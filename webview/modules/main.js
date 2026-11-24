@@ -6,13 +6,25 @@ function updateHeader(tabId) {
     if (!button) return;
     const active = id === tabId;
     button.classList.toggle('text-primary', active);
-    button.classList.toggle('text-neutral-400', !active);
-    const label = button.querySelector('span:last-child');
+    button.classList.toggle('text-neutral-500', !active);
+    const icon = button.querySelector('.nav-icon');
+    if (icon) icon.style.fontVariationSettings = active ? "'FILL' 1, 'wght' 600" : "'FILL' 0, 'wght' 500";
+    const label = button.querySelector('.nav-label');
     if (label) {
       label.classList.toggle('font-bold', active);
       label.classList.toggle('font-medium', !active);
     }
   });
+  const centerLabel = document.getElementById('nav-label-sales');
+  if (centerLabel) {
+    centerLabel.classList.toggle('text-primary', tabId === 'sales');
+    centerLabel.classList.toggle('text-neutral-600', tabId !== 'sales');
+  }
+  const fab = document.getElementById('nav-sales-fab');
+  if (fab) {
+    fab.classList.toggle('bg-primary', tabId === 'sales');
+    fab.classList.toggle('bg-neutral-900', tabId !== 'sales');
+  }
 }
 
 function switchTab(tabId) {

@@ -1,26 +1,55 @@
-<!-- FIXED BOTTOM TAB NAVIGATION (5 TABS) -->
-  <nav class="shrink-0 bg-white border-t border-neutral-200 px-2 py-1.5 flex items-center justify-around z-20">
-    <button class="flex flex-col items-center gap-0.5 py-1 px-2 transition-all text-primary" id="nav-btn-dashboard" onclick="switchTab('dashboard')">
-      <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
-      <span class="text-[9.5px] font-bold">Tổng quan</span>
-    </button>
-    <button class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-neutral-600 transition-all text-neutral-400" id="nav-btn-sales" onclick="switchTab('sales')">
-      <div class="relative">
-        <span class="material-symbols-outlined text-[20px]">point_of_sale</span>
-        <span class="hidden absolute -top-1 -right-2 w-3.5 h-3.5 bg-primary text-white text-[9px] rounded-full flex items-center justify-center font-medium" id="nav-cart-indicator">0</span>
+<!-- FIXED BOTTOM TAB NAVIGATION (5 TABS, ORGANIC ARCH BG + CENTER BUTTON) -->
+  <nav class="relative shrink-0 z-20 pointer-events-none">
+    <!-- Unified Organic Arched Background SVG -->
+    <div class="absolute inset-x-0 bottom-0 top-[-14px] overflow-visible pointer-events-none" aria-hidden="true">
+      <svg class="w-full h-full" viewBox="0 0 390 90" preserveAspectRatio="none" fill="none">
+        <path d="M 0,14 L 125,14 C 150,14 162,12 174,7 C 182,3.5 188,2 195,2 C 202,2 208,3.5 216,7 C 228,12 240,14 265,14 L 390,14 L 390,90 L 0,90 Z" fill="rgba(255, 255, 255, 0.96)" stroke="#E5E7EB" stroke-width="1"></path>
+      </svg>
+    </div>
+
+    <!-- Tab items grid -->
+    <div class="relative z-10 grid grid-cols-5 items-center h-[76px] px-3 pointer-events-auto">
+      <!-- Tab 1: Tổng quan -->
+      <div class="flex items-center justify-center pt-1">
+        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 text-primary" id="nav-btn-dashboard" onclick="switchTab('dashboard')">
+          <span class="material-symbols-outlined text-[22px] nav-icon" style="font-variation-settings: 'FILL' 1, 'wght' 600;">space_dashboard</span>
+          <span class="nav-label text-[11px] font-bold mt-0.5 tracking-tight">Tổng quan</span>
+        </button>
       </div>
-      <span class="text-[9.5px] font-medium">Bán hàng</span>
-    </button>
-    <button class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-neutral-600 transition-all text-neutral-400" id="nav-btn-menu" onclick="switchTab('menu')">
-      <span class="material-symbols-outlined text-[20px]">restaurant_menu</span>
-      <span class="text-[9.5px] font-medium">Menu</span>
-    </button>
-    <button class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-neutral-600 transition-all text-neutral-400" id="nav-btn-stats" onclick="switchTab('stats')">
-      <span class="material-symbols-outlined text-[20px]">monitoring</span>
-      <span class="text-[9.5px] font-medium">Thống kê</span>
-    </button>
-    <button class="flex flex-col items-center gap-0.5 py-1 px-2 hover:text-neutral-600 transition-all text-neutral-400" id="nav-btn-history" onclick="switchTab('history')">
-      <span class="material-symbols-outlined text-[20px]">history</span>
-      <span class="text-[9.5px] font-medium">Lịch sử</span>
-    </button>
+
+      <!-- Tab 2: Menu -->
+      <div class="flex items-center justify-center pt-1">
+        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 text-neutral-500" id="nav-btn-menu" onclick="switchTab('menu')">
+          <span class="material-symbols-outlined text-[22px] nav-icon" style="font-variation-settings: 'FILL' 0, 'wght' 500;">restaurant_menu</span>
+          <span class="nav-label text-[11px] font-medium mt-0.5 tracking-tight">Menu</span>
+        </button>
+      </div>
+
+      <!-- Tab 3: Bán hàng - center elevated -->
+      <div class="flex items-center justify-center pt-1 z-20">
+        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 active:scale-95" id="nav-btn-sales" onclick="switchTab('sales')">
+          <span class="relative -mt-3.5 w-12 h-12 rounded-full bg-neutral-900 shadow-md ring-2 ring-white/80 flex items-center justify-center transition-colors" id="nav-sales-fab">
+            <span class="material-symbols-outlined text-[24px] text-white" style="font-variation-settings: 'FILL' 1, 'wght' 500;">point_of_sale</span>
+            <span class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold ring-2 ring-white" id="nav-cart-indicator">0</span>
+          </span>
+          <span class="nav-label text-[11px] font-medium text-neutral-600 mt-1 tracking-tight" id="nav-label-sales">Bán hàng</span>
+        </button>
+      </div>
+
+      <!-- Tab 4: Thống kê -->
+      <div class="flex items-center justify-center pt-1">
+        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 text-neutral-500" id="nav-btn-stats" onclick="switchTab('stats')">
+          <span class="material-symbols-outlined text-[22px] nav-icon" style="font-variation-settings: 'FILL' 0, 'wght' 500;">monitoring</span>
+          <span class="nav-label text-[11px] font-medium mt-0.5 tracking-tight">Thống kê</span>
+        </button>
+      </div>
+
+      <!-- Tab 5: Lịch sử -->
+      <div class="flex items-center justify-center pt-1">
+        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 text-neutral-500" id="nav-btn-history" onclick="switchTab('history')">
+          <span class="material-symbols-outlined text-[22px] nav-icon" style="font-variation-settings: 'FILL' 0, 'wght' 500;">history</span>
+          <span class="nav-label text-[11px] font-medium mt-0.5 tracking-tight">Lịch sử</span>
+        </button>
+      </div>
+    </div>
   </nav>

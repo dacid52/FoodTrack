@@ -53,3 +53,38 @@ export async function setBackgroundSyncEnabled(enabled: boolean): Promise<void> 
 export async function getBackgroundSyncStatus(): Promise<BackgroundTask.BackgroundTaskStatus> {
   return BackgroundTask.getStatusAsync();
 }
+
+let scheduledSyncInFlight: Promise<void> | null = null;
+
+export async function runDailyScheduledSync(): Promise<void> {
+  if (scheduledSyncInFlight) return scheduledSyncInFlight;
+  scheduledSyncInFlight = (async () => {
+    try {
+      if (await readSetting('auto_sync') !== 'true') return;
+      if (!await getConnection()) return;
+      const now = new Date();
+      const scheduledAt = new Date(now);
+      scheduledAt.setHours(23, 50, 0, 0);
+      if (now < scheduledAt) return;
+      const lastSyncRaw = await readSetting('last_sync_at');
+      if (lastSyncRaw) {
+        const lastSyncAt = new Date(lastSyncRaw);
+        if (!Number.isNaN(lastSyncAt.getTime()) && lastSyncAt >= scheduledAt) return;
+      }
+      let deviceId = await readSetting('device_id');
+      if (!deviceId) {
+        deviceId = newId();
+        await writeSetting('device_id', deviceId);
+      }
+      await synchronizeDrive(deviceId);
+      await writeSetting('last_sync_error', '');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Lỗi đồng bộ định kỳ không xác định.';
+      console.error('FoodTrack scheduled Drive sync failed', error);
+      await writeSetting('last_sync_error', message);
+    } finally {
+      scheduledSyncInFlight = null;
+    }
+  })();
+  return scheduledSyncInFlight;
+}

@@ -9,13 +9,13 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, AppState, Text, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { ErrorNotice } from '../components/ui';
 import { useAppStore } from '../store/useAppStore';
 import { colors } from '../theme/tokens';
-import '../sync/background';
+import { runDailyScheduledSync } from '../sync/background';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -46,6 +46,14 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded && (ready || started)) void SplashScreen.hideAsync();
   }, [fontsLoaded, ready, started]);
+
+  useEffect(() => {
+    void runDailyScheduledSync().catch(() => undefined);
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') void runDailyScheduledSync().catch(() => undefined);
+    });
+    return () => subscription.remove();
+  }, []);
 
   if (!fontsLoaded || (!ready && !started)) return null;
   if (!ready) {
