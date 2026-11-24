@@ -1,0 +1,242 @@
+  <!-- ================= MODAL 1: FORM GHI NHẬN CHI PHÍ ================= -->
+  <div class="hidden absolute inset-0 bg-black/50 z-50 flex flex-col justify-end" id="expense-modal">
+    <div class="bg-white rounded-t-3xl max-h-[90%] flex flex-col overflow-hidden">
+      <div class="p-3.5 border-b border-neutral-100 flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-sm text-neutral-900">Ghi nhận chi phí</h3>
+        <button class="p-1 text-neutral-500 hover:text-neutral-800" onclick="closeExpenseModal()">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <div class="p-3.5 overflow-y-auto space-y-3.5 hide-scrollbar">
+        <div class="flex p-1 bg-neutral-100 rounded-xl text-xs font-semibold text-neutral-600">
+          <button class="flex-1 py-1.5 rounded-lg bg-white text-neutral-900 shadow-sm transition-all text-center" id="exp-type-import" onclick="setExpenseType('import')">Tiền nhập hàng</button>
+          <button class="flex-1 py-1.5 rounded-lg hover:text-neutral-900 transition-all text-center" id="exp-type-other" onclick="setExpenseType('other')">Chi phí khác</button>
+        </div>
+        <div class="bg-neutral-50 rounded-2xl p-3.5 border border-neutral-200">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Số tiền chi</span>
+          <div class="mt-1 flex items-center justify-between border-b border-neutral-200 pb-1.5 focus-within:border-primary transition-colors">
+            <input class="text-2xl font-extrabold text-neutral-900 bg-transparent w-full border-0 focus:outline-none focus:ring-0" id="exp-amount-input" oninput="formatExpenseAmountInput(); updateExpenseButtonText()" type="text" inputmode="numeric">
+            <span class="text-lg font-bold text-primary">đ</span>
+          </div>
+          <div class="grid grid-cols-5 gap-1 mt-2.5" id="exp-quick-amounts"></div>
+        </div>
+        <div class="space-y-2.5 text-xs">
+          <div>
+            <label class="block font-semibold text-neutral-600 mb-1">Nội dung chi</label>
+            <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800" id="exp-content-input" type="text">
+          </div>
+          <div>
+            <label class="block font-semibold text-neutral-600 mb-1">Hình thức thanh toán</label>
+            <div class="grid grid-cols-3 gap-1.5 p-1 bg-neutral-100 rounded-xl">
+              <button class="py-1.5 rounded-lg text-xs font-bold bg-white text-neutral-900 shadow-sm text-center" id="exp-pay-cash" onclick="setExpensePayMethod('Tiền mặt')" type="button">Tiền mặt</button>
+              <button class="py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 text-center" id="exp-pay-transfer" onclick="setExpensePayMethod('Chuyển khoản')" type="button">Chuyển khoản</button>
+              <button class="py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 text-center" id="exp-pay-debt" onclick="setExpensePayMethod('Ghi nợ')" type="button">Ghi nợ</button>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-neutral-600 mb-1">Ghi chú (tùy chọn)</label>
+            <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800" id="exp-note-input" type="text">
+          </div>
+        </div>
+      </div>
+      <div class="p-3.5 border-t border-neutral-100 bg-neutral-50/80">
+        <button class="w-full py-3 rounded-xl font-bold text-xs bg-primary text-white shadow-md active:scale-98 transition-all flex items-center justify-center gap-1.5" id="btn-save-expense" onclick="saveExpenseRecord()">
+          <span class="material-symbols-outlined text-[16px]">check</span>
+          <span id="btn-save-expense-text">Lưu chi phí</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 2: THÊM / SỬA MÓN (KHÔNG CÓ DANH MỤC) ================= -->
+  <div class="absolute inset-0 bg-black/50 z-50 flex flex-col justify-end hidden" id="menu-modal">
+    <div class="bg-white rounded-t-3xl max-h-[90%] flex flex-col overflow-hidden">
+      <div class="p-3.5 border-b border-neutral-100 flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-sm text-neutral-900" id="menu-modal-title">Thêm món mới</h3>
+        <button class="p-1 text-neutral-400 hover:text-neutral-700" onclick="closeMenuModal()">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+      <div class="p-3.5 overflow-y-auto space-y-3 hide-scrollbar text-xs">
+        <input id="menu-form-id" type="hidden" value="">
+        <div>
+          <label class="block font-semibold text-neutral-600 mb-1">Tên món ăn <span class="text-red-500">*</span></label>
+          <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800" id="menu-form-name" type="text">
+        </div>
+        <div>
+          <label class="block font-semibold text-neutral-600 mb-1">Giá bán (VNĐ) <span class="text-red-500">*</span></label>
+          <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 font-bold" id="menu-form-price" type="number">
+        </div>        <div>
+          <label class="block font-semibold text-neutral-600 mb-1">Hình ảnh món</label>
+          <div class="space-y-2"><div class="flex items-center gap-2.5"><div class="w-12 h-12 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center overflow-hidden shrink-0"><img alt="Preview" class="w-full h-full object-cover hidden" id="menu-form-image-preview" src=""><span class="material-symbols-outlined text-neutral-400 text-[22px]" id="menu-form-image-placeholder">photo_camera</span></div><div class="flex-1"><input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800" id="menu-form-image" oninput="updateMenuImagePreview(this.value)" type="text"></div></div><div class="flex items-center gap-2"><label class="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-semibold text-xs rounded-xl cursor-pointer transition-colors border border-neutral-200/80"><span class="material-symbols-outlined text-[16px]">photo_library</span><span>Chọn từ album / máy</span><input accept="image/*" class="sr-only" id="menu-form-file-input" onchange="if(this.files &amp;&amp; this.files[0]){ const r = new FileReader(); r.onload = function(e){ const val = e.target.result; document.getElementById('menu-form-image').value = val; updateMenuImagePreview(val); }; r.readAsDataURL(this.files[0]); }" type="file"></label></div><div><p class="text-[10px] text-neutral-400 font-medium mb-1.5">Hoặc chọn nhanh ảnh mẫu ăn vặt:</p><div class="grid grid-cols-6 gap-1.5"><button class="w-full aspect-square rounded-lg overflow-hidden border border-neutral-200 hover:border-primary focus:border-primary active:scale-95 transition-all" onclick="const u='https://images.unsplash.com/photo-1563245372-f21724e3856d?w=300&amp;auto=format&amp;fit=crop&amp;q=80'; document.getElementById('menu-form-image').value=u; updateMenuImagePreview(u);" title="Cá viên chiên" type="button"><img alt="Mẫu 1" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1563245372-f21724e3856d?w=100&amp;auto=format&amp;fit=crop&amp;q=60"></button><button class="w-full aspect-square rounded-lg overflow-hidden border border-neutral-200 hover:border-primary focus:border-primary active:scale-95 transition-all" onclick="const u='https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=300&amp;auto=format&amp;fit=crop&amp;q=80'; document.getElementById('menu-form-image').value=u; updateMenuImagePreview(u);" title="Gà rán" type="button"><img alt="Mẫu 2" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=100&amp;auto=format&amp;fit=crop&amp;q=60"></button><button class="w-full aspect-square rounded-lg overflow-hidden border border-neutral-200 hover:border-primary focus:border-primary active:scale-95 transition-all" onclick="const u='https://images.unsplash.com/photo-1597474240766-917037574345?w=300&amp;auto=format&amp;fit=crop&amp;q=80'; document.getElementById('menu-form-image').value=u; updateMenuImagePreview(u);" title="Xúc xích nướng" type="button"><img alt="Mẫu 3" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1597474240766-917037574345?w=100&amp;auto=format&amp;fit=crop&amp;q=60"></button><button class="w-full aspect-square rounded-lg overflow-hidden border border-neutral-200 hover:border-primary focus:border-primary active:scale-95 transition-all" onclick="const u='https://images.unsplash.com/photo-1576107232684-1279f3908594?w=300&amp;auto=format&amp;fit=crop&amp;q=80'; document.getElementById('menu-form-image').value=u; updateMenuImagePreview(u);" title="Khoai lắc" type="button"><img alt="Mẫu 4" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1576107232684-1279f3908594?w=100&amp;auto=format&amp;fit=crop&amp;q=60"></button><button class="w-full aspect-square rounded-lg border border-neutral-200 hover:border-primary focus:border-primary overflow-hidden active:scale-95 transition-all" onclick="const u='https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=300&amp;auto=format&amp;fit=crop&amp;q=80'; document.getElementById('menu-form-image').value=u; updateMenuImagePreview(u);" title="Trà tắc" type="button"><img alt="Mẫu 5" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=100&amp;auto=format&amp;fit=crop&amp;q=60"></button><button class="w-full aspect-square rounded-lg border border-neutral-200 hover:border-primary focus:border-primary overflow-hidden active:scale-95 transition-all" onclick="const u='https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=300&amp;auto=format&amp;fit=crop&amp;q=80'; document.getElementById('menu-form-image').value=u; updateMenuImagePreview(u);" title="Trà đào" type="button"><img alt="Mẫu 6" class="w-full h-full object-cover" src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=100&amp;auto=format&amp;fit=crop&amp;q=60"></button></div></div></div>
+        </div>
+        <div>
+          <label class="block font-semibold text-neutral-600 mb-1">Trạng thái bán</label>
+          <div class="flex items-center justify-between p-2.5 bg-neutral-50 rounded-xl border border-neutral-200">
+            <span class="text-xs font-semibold text-emerald-700" id="menu-form-status-text">Đang mở bán</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input checked="" class="sr-only peer" id="menu-form-active" onchange="toggleFormStatusLabel()" type="checkbox">
+              <div class="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="p-3.5 border-t border-neutral-100 flex gap-2 bg-neutral-50">
+        <button class="w-1/3 py-2.5 rounded-xl font-semibold text-xs bg-white border border-neutral-200 text-neutral-700" onclick="closeMenuModal()">Hủy</button>
+        <button class="w-2/3 py-2.5 rounded-xl font-bold text-xs bg-neutral-900 text-white shadow-sm active:scale-95" onclick="saveMenuItem()">Lưu món</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL 3: CHI TIẾT GIAO DỊCH ================= -->
+  <div class="hidden absolute inset-0 bg-black/50 z-50 flex flex-col justify-end" id="tx-detail-modal">
+    <div class="bg-white rounded-t-3xl max-h-[85%] flex flex-col overflow-hidden">
+      <div class="p-3.5 border-b border-neutral-100 flex items-center justify-between">
+        <h3 class="font-bold text-sm text-neutral-900">Chi tiết giao dịch</h3>
+        <button class="p-1 text-neutral-400 hover:text-neutral-700" onclick="closeTxDetailModal()">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+      <div class="p-4 overflow-y-auto space-y-3.5 hide-scrollbar">
+        <div class="text-center py-1">
+          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800" id="tx-modal-type-badge">Đơn hàng thành công</span>
+          <h4 class="text-2xl font-extrabold text-neutral-900 mt-1.5" id="tx-modal-amount">+105.000 đ</h4>
+          <p class="text-xs font-semibold text-neutral-700 mt-0.5" id="tx-modal-title">Đơn hàng #038</p>
+        </div>
+        <div class="bg-neutral-50 rounded-2xl p-3 border border-neutral-200 space-y-2 text-xs">
+          <div class="flex justify-between py-1 border-b border-neutral-200/60">
+            <span class="text-neutral-500">Thời gian</span>
+            <span class="font-semibold text-neutral-800" id="tx-modal-time">11:24 - Hôm nay</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-neutral-200/60">
+            <span class="text-neutral-500">Phương thức</span>
+            <span class="font-semibold text-neutral-800" id="tx-modal-method">Tiền mặt</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-neutral-200/60">
+            <span class="text-neutral-500">Mã giao dịch</span>
+            <span class="font-mono text-neutral-800 font-semibold" id="tx-modal-id">TX-038</span>
+          </div>
+          <div class="pt-1" id="tx-modal-desc-wrap">
+            <span class="text-neutral-500 block mb-1">Nội dung chi tiết:</span>
+            <div class="font-medium text-neutral-800 bg-white p-2.5 rounded-xl border border-neutral-200/70" id="tx-modal-desc">Cá viên chiên mắm x2, Trà tắc khổng lồ x1</div>
+          </div>
+          <div class="pt-1 hidden" id="tx-modal-items-wrap">
+            <span class="text-neutral-500 block mb-1">Món trong đơn:</span>
+            <div class="bg-white rounded-xl border border-neutral-200/70 px-2.5 divide-y divide-neutral-100" id="tx-modal-items"></div>
+          </div>
+        </div>
+      </div>
+      <div class="p-3.5 border-t border-neutral-100 bg-neutral-50 space-y-2">
+        <div class="hidden gap-2" id="tx-modal-actions">
+          <button class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-100 active:scale-95 transition-all flex items-center justify-center gap-1" onclick="openEditOrderModal()">
+            <span class="material-symbols-outlined text-[15px]">edit</span>
+            Chỉnh sửa
+          </button>
+          <button class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 active:scale-95 transition-all flex items-center justify-center gap-1" onclick="promptDeleteOrder()">
+            <span class="material-symbols-outlined text-[15px]">delete</span>
+            Xóa đơn
+          </button>
+        </div>
+        <button class="w-full py-2.5 rounded-xl font-bold text-xs bg-neutral-900 text-white" onclick="closeTxDetailModal()">Đóng</button>
+      </div>
+    </div>
+  </div><!-- MODAL CHỈNH SỬA ĐƠN HÀNG (CHỈ ĐƠN TRONG NGÀY) -->
+  <div class="hidden absolute inset-0 bg-black/50 z-50 flex flex-col justify-end" id="edit-order-modal">
+    <div class="bg-white rounded-t-3xl max-h-[90%] flex flex-col overflow-hidden">
+      <div class="p-3.5 border-b border-neutral-100 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-sm text-neutral-900">Chỉnh sửa đơn hàng</h3>
+          <p class="text-[10px] text-neutral-400 font-medium" id="edit-order-subtitle"></p>
+        </div>
+        <button class="p-1 text-neutral-400 hover:text-neutral-700" onclick="closeEditOrderModal()">
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+      <div class="p-3.5 overflow-y-auto space-y-2.5 hide-scrollbar flex-1">
+        <div id="edit-order-items" class="space-y-2"></div>
+        <div class="flex gap-2">
+          <select id="edit-order-product-select" class="flex-1 min-w-0 text-[11px] py-2 px-2 border border-neutral-200 rounded-xl bg-neutral-50 font-semibold text-neutral-700 focus:outline-none focus:border-primary"></select>
+          <button onclick="addEditOrderItem()" class="px-3 py-2 rounded-xl bg-neutral-900 text-white text-[11px] font-bold flex items-center gap-1 active:scale-95 transition-all shrink-0">
+            <span class="material-symbols-outlined text-[15px]">add</span>
+            Thêm
+          </button>
+        </div>
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Phương thức thanh toán</p>
+          <div class="grid grid-cols-3 gap-1 p-0.5 bg-neutral-100 rounded-xl text-xs font-semibold text-neutral-600">
+            <button id="edit-order-pay-cash" onclick="setEditOrderPay('cash')" class="py-1.5 rounded-lg transition-all text-center">Tiền mặt</button>
+            <button id="edit-order-pay-transfer" onclick="setEditOrderPay('transfer')" class="py-1.5 rounded-lg transition-all text-center">Chuyển khoản</button>
+            <button id="edit-order-pay-debt" onclick="setEditOrderPay('debt')" class="py-1.5 rounded-lg transition-all text-center">Ghi nợ</button>
+          </div>
+        </div>
+        <div class="flex justify-between items-center bg-neutral-50 rounded-xl p-2.5 border border-neutral-200">
+          <span class="text-xs font-bold text-neutral-600">Tổng đơn</span>
+          <span class="text-sm font-extrabold text-neutral-900" id="edit-order-total">0 đ</span>
+        </div>
+      </div>
+      <div class="p-3.5 border-t border-neutral-100 bg-neutral-50 flex gap-2">
+        <button onclick="closeEditOrderModal()" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-white border border-neutral-200 text-neutral-700">Hủy</button>
+        <button id="edit-order-save-btn" onclick="saveEditOrder()" class="flex-1 py-2.5 rounded-xl font-bold text-xs bg-primary text-white shadow-md active:scale-95 transition-all">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL XÁC NHẬN XÓA ĐƠN HÀNG -->
+  <div id="delete-order-confirm-modal" class="hidden absolute inset-0 bg-black/50 z-50 flex flex-col justify-end">
+    <div class="bg-white rounded-t-3xl p-4 space-y-3 shadow-2xl">
+      <div class="w-12 h-12 rounded-2xl bg-red-50 border border-red-200 text-red-500 flex items-center justify-center mx-auto">
+        <span class="material-symbols-outlined text-[28px]">delete</span>
+      </div>
+      <div class="text-center">
+        <h3 class="text-sm font-bold text-neutral-900">Xóa đơn hàng này?</h3>
+        <p class="text-xs text-neutral-500 mt-1 px-2" id="delete-order-confirm-text">Đơn sẽ bị xóa khỏi lịch sử và báo cáo.</p>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeDeleteOrderModal()" class="w-1/3 py-2.5 rounded-xl font-semibold text-xs bg-white border border-neutral-200 text-neutral-700">Hủy</button>
+        <button onclick="executeDeleteOrder()" class="w-2/3 py-2.5 rounded-xl font-bold text-xs bg-red-600 hover:bg-red-700 text-white shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">delete</span>
+          Xóa đơn
+        </button>
+      </div>
+    </div>
+  </div><!-- MODAL XÁC NHẬN KHÔI PHỤC DỮ LIỆU TỪ DRIVE -->
+<div id="restore-confirm-modal" class="hidden absolute inset-0 bg-black/50 z-50 flex flex-col justify-end">
+  <div class="bg-white rounded-t-3xl max-h-[85%] flex flex-col overflow-hidden p-4 space-y-3 shadow-2xl">
+    <div class="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center mx-auto">
+      <span class="material-symbols-outlined text-[28px]">warning</span>
+    </div>
+    <div class="text-center">
+      <h3 class="text-sm font-bold text-neutral-900">Xác nhận khôi phục dữ liệu?</h3>
+      <p class="text-xs text-red-600 font-medium mt-1 px-2">CẢNH BÁO: Toàn bộ dữ liệu hiện tại trên máy sẽ bị thay thế bằng bản sao lưu này. Hành động này không thể hoàn tác!</p>
+    </div>
+    <div class="bg-neutral-50 p-3 rounded-xl border border-neutral-200 text-xs text-neutral-600 space-y-1.5">
+      <div class="flex justify-between items-center"><span class="text-neutral-500">Tệp khôi phục:</span><span class="font-semibold font-mono text-neutral-800 text-[11px] truncate max-w-[180px]" id="restore-modal-filename">-</span></div>
+      <div class="flex justify-between items-center"><span class="text-neutral-500">Thời gian sao lưu:</span><span class="font-bold text-neutral-900 text-[11px]" id="restore-modal-time">-</span></div>
+      <div class="flex justify-between items-center"><span class="text-neutral-500">Dung lượng:</span><span class="font-bold text-neutral-700 text-[11px]" id="restore-modal-size">-</span></div>
+    </div>
+    <div class="flex gap-2 pt-1">
+      <button onclick="closeRestoreModal()" class="w-1/3 py-2.5 rounded-xl font-semibold text-xs bg-white border border-neutral-200 text-neutral-700" id="restore-modal-cancel-btn">Hủy</button>
+      <button onclick="executeRestoreData()" class="w-2/3 py-2.5 rounded-xl font-bold text-xs bg-red-600 hover:bg-red-700 text-white shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5" id="restore-modal-confirm-btn">
+        <span class="material-symbols-outlined text-[16px]" id="restore-modal-icon">history</span>
+        <span id="restore-modal-btn-text">Khôi phục</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL XÁC NHẬN NGẮT KẾT NỐI DRIVE -->
+<div id="disconnect-confirm-modal" class="hidden absolute inset-0 bg-black/50 z-50 flex flex-col justify-end">
+  <div class="bg-white rounded-t-3xl max-h-[85%] flex flex-col overflow-hidden p-4 space-y-3 shadow-2xl">
+    <div class="w-12 h-12 rounded-2xl bg-neutral-100 text-neutral-600 flex items-center justify-center mx-auto">
+      <span class="material-symbols-outlined text-[28px]">cloud_off</span>
+    </div>
+    <div class="text-center">
+      <h3 class="text-sm font-bold text-neutral-900">Ngắt kết nối Google Drive?</h3>
+      <p class="text-xs text-neutral-500 mt-1 px-2">Dữ liệu trên máy vẫn được giữ.</p>
+    </div>
+    <div class="flex gap-2 pt-1">
+      <button onclick="closeDisconnectModal()" class="w-1/3 py-2.5 rounded-xl font-semibold text-xs bg-white border border-neutral-200 text-neutral-700">Giữ kết nối</button>
+      <button onclick="executeDisconnectDrive()" class="w-2/3 py-2.5 rounded-xl font-bold text-xs bg-neutral-900 text-white shadow-md active:scale-95 transition-all">Ngắt kết nối</button>
+    </div>
+  </div>
+</div>

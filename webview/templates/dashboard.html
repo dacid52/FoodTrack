@@ -1,0 +1,174 @@
+    <!-- ================= VIEW 1: TỔNG QUAN (LỢI NHUẬN LÀ CHỈ SỐ NỔI BẬT NHẤT) ================= -->
+    <section class="p-3.5 space-y-3 pb-24" id="view-dashboard">
+      <div class="flex items-center justify-between pt-0.5">
+        <div>
+          <p class="text-[11px] text-neutral-500 font-medium">Hôm nay, 24/10/2025</p>
+          <h2 class="text-base font-bold text-neutral-900" id="dash-greeting">Chúc nay đắt khách!</h2>
+        </div>
+        <button class="text-xs font-semibold text-primary bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-200/80 active:scale-95 transition-transform flex items-center gap-1" onclick="switchTab('sales')">
+          <span class="material-symbols-outlined text-[15px]">add_shopping_cart</span>
+          Bán ngay
+        </button>
+      </div>
+
+      <!-- Filter Thời gian Dashboard -->
+      <div class="flex gap-1 p-1 bg-neutral-100 rounded-xl text-xs font-medium text-neutral-600">
+        <button class="flex-1 py-1.5 rounded-lg font-semibold bg-white text-neutral-900 shadow-sm transition-all text-center" id="dash-filter-today" onclick="setDashboardFilter('today')">Hôm nay</button>
+        <button class="flex-1 py-1.5 rounded-lg hover:text-neutral-900 transition-all text-center" id="dash-filter-yesterday" onclick="setDashboardFilter('yesterday')">Hôm qua</button>
+        <button class="flex-1 py-1.5 rounded-lg hover:text-neutral-900 transition-all text-center" id="dash-filter-7days" onclick="setDashboardFilter('7days')">7 ngày</button>
+        <button class="flex-1 py-1.5 rounded-lg hover:text-neutral-900 transition-all text-center" id="dash-filter-month" onclick="setDashboardFilter('month')">Tháng này</button>
+      </div>
+
+      <!-- CARD HERO: LỢI NHUẬN NỔI BẬT NHẤT (THAY VÌ DOANH THU) -->
+      <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-2xl p-4 shadow-md relative overflow-hidden">
+        <div class="absolute -right-3 -bottom-5 text-white/10 select-none pointer-events-none">
+          <span class="material-symbols-outlined text-[115px]">payments</span>
+        </div>
+        <div class="relative z-10">
+          <div class="flex justify-between items-start">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span>
+              <span class="text-[11px] font-extrabold uppercase tracking-wider text-emerald-100" id="dash-hero-period-label">LỢI NHUẬN HÔM NAY</span>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/20 text-white backdrop-blur-sm" id="dash-order-count-badge">38 đơn</span>
+          </div>
+
+          <!-- Con số Lợi Nhuận Lớn Nhất & Nổi Bật Nhất -->
+          <div class="mt-2.5 flex items-baseline gap-1">
+            <span class="text-3xl sm:text-[34px] font-black tracking-tight text-white" id="dash-profit-val">+1.650.000</span>
+            <span class="text-base font-bold text-emerald-100">đ</span>
+          </div>
+
+
+        </div>
+      </div>
+
+      <!-- 3 CHỈ SỐ THÀNH PHẦN: DOANH THU (CHUYỂN VỀ VỊ TRÍ PHỤ), TIỀN NHẬP HÀNG, CHI PHÍ KHÁC -->
+      <div class="grid grid-cols-3 gap-2">
+        <!-- Doanh thu chuyển thành phụ -->
+        <div class="bg-white rounded-2xl p-2.5 border border-neutral-200/80 shadow-sm">
+          <div class="flex items-center gap-1 text-neutral-400">
+            <span class="material-symbols-outlined text-[13px] text-primary">storefront</span>
+            <p class="text-[10px] font-bold uppercase tracking-tight">Doanh thu</p>
+          </div>
+          <p class="text-[12px] font-extrabold text-neutral-900 mt-1 leading-tight whitespace-nowrap"><span id="dash-revenue-val">2.450.000</span> <span class="text-[10px] font-semibold text-neutral-400">đ</span></p>
+
+        </div>
+        <!-- Tiền nhập hàng -->
+        <div class="bg-white rounded-2xl p-2.5 border border-neutral-200/80 shadow-sm">
+          <div class="flex items-center gap-1 text-neutral-400">
+            <span class="material-symbols-outlined text-[13px] text-orange-600">inventory_2</span>
+            <p class="text-[10px] font-bold uppercase tracking-tight">Nhập hàng</p>
+          </div>
+          <p class="text-[12px] font-extrabold text-neutral-900 mt-1 leading-tight whitespace-nowrap"><span id="dash-cost-goods">680.000</span> <span class="text-[10px] font-semibold text-neutral-400">đ</span></p>
+
+        </div>
+        <!-- Chi phí khác -->
+        <div class="bg-white rounded-2xl p-2.5 border border-neutral-200/80 shadow-sm">
+          <div class="flex items-center gap-1 text-neutral-400">
+            <span class="material-symbols-outlined text-[13px] text-neutral-500">receipt_long</span>
+            <p class="text-[10px] font-bold uppercase tracking-tight">Chi khác</p>
+          </div>
+          <p class="text-[12px] font-extrabold text-neutral-900 mt-1 leading-tight whitespace-nowrap"><span id="dash-cost-other">120.000</span> <span class="text-[10px] font-semibold text-neutral-400">đ</span></p>
+
+        </div>
+      </div>
+
+      <!-- Thao tác nhanh -->
+      <div>
+        <h3 class="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Thao tác nhanh</h3>
+        <div class="grid grid-cols-4 gap-2">
+          <button class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 flex flex-col items-center gap-1.5 active:scale-95 transition-all shadow-sm group" onclick="switchTab('sales')">
+            <div class="w-10 h-10 rounded-xl bg-orange-50 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-[20px]">point_of_sale</span>
+            </div>
+            <span class="text-[11px] font-semibold text-neutral-800">Tạo đơn</span>
+          </button>
+          <button class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 flex flex-col items-center gap-1.5 active:scale-95 transition-all shadow-sm group" onclick="openExpenseModal('import')">
+            <div class="w-10 h-10 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center group-hover:bg-neutral-800 group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-[20px]">inventory_2</span>
+            </div>
+            <span class="text-[11px] font-semibold text-neutral-800">Nhập</span>
+          </button>
+          <button class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 flex flex-col items-center gap-1.5 active:scale-95 transition-all shadow-sm group" onclick="openExpenseModal('other')">
+            <div class="w-10 h-10 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center group-hover:bg-neutral-800 group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+            </div>
+            <span class="text-[11px] font-semibold text-neutral-800">Chi phí</span>
+          </button>
+          <button class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 flex flex-col items-center gap-1.5 active:scale-95 transition-all shadow-sm group" onclick="switchTab('history')">
+            <div class="w-10 h-10 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center group-hover:bg-neutral-800 group-hover:text-white transition-colors">
+              <span class="material-symbols-outlined text-[20px]">history</span>
+            </div>
+            <span class="text-[11px] font-semibold text-neutral-800">Lịch sử</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Giao dịch gần đây -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Giao dịch gần đây</h3>
+          <button class="text-[11px] text-primary font-semibold hover:underline flex items-center" onclick="switchTab('history')">
+            Xem tất cả <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+          </button>
+        </div>
+        <div class="space-y-2" id="dash-transaction-list"><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-98 transition-all">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Đơn hàng #038</p>
+            <p class="text-[10px] text-neutral-400 mt-0.5">11:24 - Hôm nay • Tiền mặt</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold text-emerald-600">+75.000 đ</span>
+          <span class="block text-[9px] text-neutral-400">Chi tiết ›</span>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-98 transition-all">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Đơn hàng #037</p>
+            <p class="text-[10px] text-neutral-400 mt-0.5">11:15 - Hôm nay • Chuyển khoản</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold text-emerald-600">+50.000 đ</span>
+          <span class="block text-[9px] text-neutral-400">Chi tiết ›</span>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-98 transition-all">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Nhập cá viên &amp; gà tươi</p>
+            <p class="text-[10px] text-neutral-400 mt-0.5">09:30 - Hôm nay • Tiền mặt</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold text-orange-600">-350.000 đ</span>
+          <span class="block text-[9px] text-neutral-400">Chi tiết ›</span>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-98 transition-all">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Mua đá bi &amp; bao bì</p>
+            <p class="text-[10px] text-neutral-400 mt-0.5">08:45 - Hôm nay • Tiền mặt</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-xs font-bold text-orange-600">-40.000 đ</span>
+          <span class="block text-[9px] text-neutral-400">Chi tiết ›</span>
+        </div>
+      </div></div>
+      </div>
+    </section>

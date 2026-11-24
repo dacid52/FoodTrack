@@ -1,0 +1,152 @@
+<!-- ================= VIEW 6: CÀI ĐẶT - SAO LƯU & ĐỒNG BỘ GOOGLE DRIVE ================= -->
+<section class="hidden p-3.5 space-y-3 pb-24" id="view-settings">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-base font-bold text-neutral-900">Cài đặt</h2>
+      <p class="text-[11px] text-neutral-500 font-medium">Sao lưu và đồng bộ Google Drive</p>
+    </div>
+    <button onclick="switchTab('dashboard')" class="px-2.5 py-1 text-xs font-semibold rounded-xl bg-neutral-100 text-neutral-700 hover:bg-neutral-200 flex items-center gap-1 transition-colors">
+      <span class="material-symbols-outlined text-[15px]">arrow_back</span>
+      Quay lại
+    </button>
+  </div>
+
+  <!-- 1. KHI CHƯA KẾT NỐI GOOGLE DRIVE -->
+  <div id="settings-drive-disconnected-box" class="space-y-3">
+    <!-- Card giới thiệu & giải thích mục đích -->
+    <div class="p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-neutral-700 space-y-2">
+      <div class="flex items-center gap-2 text-amber-800 font-bold text-xs">
+        <span class="material-symbols-outlined text-[20px]">cloud_off</span>
+        <span>Chưa kết nối Google Drive</span>
+      </div>
+      <p class="text-[11px] text-neutral-600 leading-relaxed">
+        Sao lưu an toàn toàn bộ thực đơn, đơn hàng và thu chi lên Google Drive cá nhân của bạn. Dữ liệu được đồng bộ liên tục, không lo mất khi đổi điện thoại hoặc cài đặt lại ứng dụng.
+      </p>
+    </div>
+
+    <!-- Nút Kết nối Google Drive nổi bật -->
+    <button id="btn-connect-drive" onclick="connectGoogleDrive()" class="w-full py-3 px-4 rounded-2xl bg-primary hover:bg-orange-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all">
+      <span class="material-symbols-outlined text-[20px]" id="btn-connect-drive-icon">add_to_drive</span>
+      <span id="btn-connect-drive-text">Kết nối Google Drive</span>
+    </button>
+  </div>
+
+  <!-- 2. KHI ĐÃ KẾT NỐI GOOGLE DRIVE -->
+  <div id="settings-drive-connected-box" class="space-y-3 hidden">
+    <!-- Card Thông tin tài khoản Google -->
+    <div class="bg-white rounded-2xl p-3.5 border border-neutral-200/80 shadow-sm space-y-3" id="settings-account-card">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3 min-w-0">
+          <!-- Avatar: ảnh đại diện hoặc chữ cái đầu -->
+          <div class="w-11 h-11 rounded-2xl bg-neutral-100 border border-neutral-200 text-neutral-500 flex items-center justify-center shrink-0 overflow-hidden" id="settings-avatar-container">
+            <span class="material-symbols-outlined text-[24px]" id="settings-drive-icon">cloud_done</span>
+          </div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <h3 class="text-xs font-bold text-neutral-900 truncate" id="settings-user-name">Google Drive</h3>
+              <span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-neutral-100 text-neutral-600" id="settings-status-badge">Đã kết nối</span>
+            </div>
+            <p class="text-[11px] text-neutral-500 font-mono truncate mt-0.5" id="settings-user-email">Chưa kết nối</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chi tiết thông số sao lưu & đồng bộ -->
+      <div class="grid grid-cols-2 gap-2 bg-neutral-50 p-2.5 rounded-xl border border-neutral-100 text-xs">
+        <div>
+          <span class="text-[10px] text-neutral-400 block font-medium">Đồng bộ gần nhất:</span>
+          <span class="font-bold text-neutral-800 text-[11px]" id="settings-last-sync-time">Chưa đồng bộ</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-neutral-400 block font-medium">Trạng thái đồng bộ:</span>
+          <span class="font-bold text-neutral-800 text-[11px] flex items-center gap-1" id="settings-sync-status-indicator">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Sẵn sàng</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- Dòng thông báo lỗi nếu có -->
+      <div id="settings-sync-error-banner" class="hidden p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-[11px] flex items-center justify-between gap-1.5">
+        <div class="flex items-center gap-1.5 flex-1 min-w-0">
+          <span class="material-symbols-outlined text-[16px] text-red-500 shrink-0">error</span>
+          <span id="settings-sync-error-text" class="truncate font-medium"></span>
+        </div>
+        <button onclick="connectGoogleDrive()" class="px-2 py-0.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] shrink-0 active:scale-95 transition-all">
+          Cấp lại quyền
+        </button>
+      </div>
+
+      <!-- Công tắc tự động đồng bộ nền -->
+      <div class="flex items-center justify-between pt-1 border-t border-neutral-100 text-xs">
+        <div>
+          <p class="font-bold text-neutral-800">Tự động đồng bộ nền</p>
+          <p class="text-[10px] text-neutral-400" id="settings-auto-backup-status">Chưa bật</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input id="settings-auto-backup" type="checkbox" onchange="toggleAutoBackup()" class="sr-only peer">
+          <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- KHỐI HÀNH ĐỘNG ĐỒNG BỘ & SAO LƯU -->
+    <div class="bg-white rounded-2xl p-3 border border-neutral-200/80 shadow-sm space-y-2">
+      <h3 class="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Đồng bộ & Sao lưu</h3>
+
+      <!-- Nút đồng bộ duy nhất (gộp tạo backup + sync 2 chiều) -->
+      <button id="btn-trigger-sync" onclick="triggerManualSync()" class="w-full p-2.5 rounded-xl bg-neutral-900 hover:bg-black text-white font-bold text-xs flex items-center justify-between shadow-sm active:scale-98 transition-all">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-[18px]" id="btn-sync-icon">sync</span>
+          <span id="btn-sync-text">Đồng bộ &amp; Sao lưu ngay</span>
+        </div>
+        <span class="text-[10px] text-neutral-300 font-normal">Tự động ›</span>
+      </button>
+
+      <!-- Thanh tiến trình đồng bộ -->
+      <div id="sync-progress-wrap" class="hidden space-y-1">
+        <div class="h-1.5 w-full bg-neutral-100 rounded-full overflow-hidden">
+          <div id="sync-progress-bar" class="h-full bg-primary rounded-full transition-all duration-300" style="width: 0%"></div>
+        </div>
+        <p id="sync-progress-text" class="text-[10px] text-neutral-500 font-medium text-center">Đang chuẩn bị...</p>
+      </div>
+    </div>
+
+    <!-- BẢN SAO LƯU GẦN NHẤT -->
+    <div class="bg-white rounded-2xl p-3 border border-neutral-200/80 shadow-sm space-y-2" id="settings-backups-container">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1.5">
+          <h3 class="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Bản sao lưu gần nhất</h3>
+          <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-neutral-100 text-neutral-600" id="settings-backup-count">0</span>
+        </div>
+        <button onclick="refreshDriveStatus(true)" class="text-[11px] text-primary font-bold hover:underline flex items-center gap-0.5" id="btn-refresh-backups">
+          <span class="material-symbols-outlined text-[14px]">refresh</span>
+          <span>Làm mới</span>
+        </button>
+      </div>
+
+      <div id="settings-backup-list" class="space-y-2">
+        <!-- Render bản sao lưu gần nhất tại đây -->
+      </div>
+    </div>
+
+    <!-- Nút Ngắt kết nối Google Drive -->
+    <button id="btn-toggle-account" onclick="promptDisconnectDrive()" class="w-full p-2.5 rounded-xl text-neutral-500 hover:text-red-600 font-semibold text-xs flex items-center justify-between hover:bg-red-50 border border-neutral-200/60 transition-all">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[18px]">link_off</span>
+        <span>Ngắt kết nối Google Drive</span>
+      </div>
+      <span class="text-[10px] text-neutral-400">Chuyển sang Offline</span>
+    </button>
+  </div>
+
+  <!-- Hộp thông tin thư mục lưu trữ -->
+  <div class="bg-neutral-50 rounded-2xl p-3 border border-neutral-200/70 text-xs space-y-1.5 text-neutral-600">
+    <p class="font-bold text-neutral-800 flex items-center gap-1.5">
+      <span class="material-symbols-outlined text-emerald-600 text-[16px]">folder</span>
+      Google Drive
+    </p>
+    <p class="text-[11px] font-mono text-neutral-500 pl-5">appDataFolder · FoodTrack</p>
+    <p class="text-[10px] text-neutral-400 pl-5 pt-0.5">Dữ liệu được lưu riêng tư và an toàn trong thư mục ứng dụng trên Google Drive.</p>
+  </div>
+</section>

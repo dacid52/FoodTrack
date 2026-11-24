@@ -1,0 +1,203 @@
+<!-- ================= VIEW 3: MENU QUÁN (QUẢN LÝ MÓN - KHÔNG DANH MỤC) ================= -->
+    <section class="p-3.5 space-y-3 pb-24 hidden" id="view-menu">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <h2 class="text-base font-bold text-neutral-900">Menu</h2>
+          <span class="px-2 py-0.5 bg-neutral-100 rounded-full text-xs font-semibold text-neutral-600" id="menu-total-count">9 món</span>
+        </div>
+        <button class="px-3 py-1.5 rounded-xl bg-neutral-900 text-white font-semibold text-xs flex items-center gap-1 shadow-sm active:scale-95 transition-transform" onclick="openEditMenuModal(null)">
+          <span class="material-symbols-outlined text-[16px]">add</span>
+          Thêm món
+        </button>
+      </div>
+      <div class="relative">
+        <span class="material-symbols-outlined text-neutral-400 absolute left-3 top-2.5 text-[18px]">search</span>
+        <input class="w-full bg-white pl-9 pr-4 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder-neutral-400" id="menu-search-input" oninput="filterMenuItems()" type="text">
+      </div>
+      <div class="flex gap-1.5 text-xs font-medium">
+        <button class="px-3 py-1 rounded-lg bg-neutral-900 text-white transition-colors font-semibold" id="menu-filter-all" onclick="setMenuStatusFilter('all')">Tất cả</button>
+        <button class="px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors" id="menu-filter-active" onclick="setMenuStatusFilter('active')">Đang bán (<span id="menu-active-count">9</span>)</button>
+        <button class="px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 transition-colors" id="menu-filter-inactive" onclick="setMenuStatusFilter('inactive')">Tạm ngưng (<span id="menu-inactive-count">0</span>)</button>
+      </div>
+      <div class="space-y-2" id="menu-items-list"><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Gà rán giòn rụm" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Gà rán giòn rụm</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">35.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(1)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(1)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(1)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Cá viên chiên mắm" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Cá viên chiên mắm</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">30.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(2)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(2)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(2)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Xúc xích nướng" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Xúc xích nướng</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">15.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(3)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(3)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(3)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Khoai tây chiên phô mai" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Khoai tây chiên phô mai</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">25.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(4)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(4)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(4)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Bò viên chiên" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Bò viên chiên</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">25.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(5)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(5)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(5)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Bánh tráng nướng" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Bánh tráng nướng</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">20.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(6)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(6)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(6)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Bánh tráng trộn" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Bánh tráng trộn</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">20.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(7)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(7)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(7)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Trà tắc khổng lồ" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Trà tắc khổng lồ</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">15.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(8)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(8)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(8)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Trà đào hạt chia" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">
+          <div>
+            <p class="text-xs font-bold text-neutral-900">Trà đào hạt chia</p>
+            <p class="text-xs font-extrabold text-primary mt-0.5">25.000 đ</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <label class="relative inline-flex items-center cursor-pointer mr-1">
+            <input type="checkbox" checked="" onchange="toggleProductStatus(9)" class="sr-only peer">
+            <div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <button onclick="openEditMenuModal(9)" class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700">
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button onclick="deleteProduct(9)" class="p-1 rounded-lg text-neutral-400 hover:text-red-600">
+            <span class="material-symbols-outlined text-[18px]">delete</span>
+          </button>
+        </div>
+      </div></div>
+    </section>
