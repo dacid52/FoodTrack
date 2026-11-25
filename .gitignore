@@ -51,9 +51,19 @@ yarn-error.*
 .vscode/
 .idea/
 .cursor/
+.windsurf/
 *.swp
 *.swo
 Desktop.ini
+
+# AI agent configs
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.claude/
+.codex/
+.gemini/
+.aider*
 
 # local preview / scratch / OS / secrets
 webview-test/

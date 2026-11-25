@@ -1,6 +1,5 @@
 module.exports = {
   content: [
-    '../UX-UI/code.html',
     './webview/templates/**/*.html',
     './webview/modules/**/*.js',
   ],
