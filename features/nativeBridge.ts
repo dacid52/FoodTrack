@@ -362,6 +362,10 @@ export async function handleNativeBridgeRequest(method: string, rawPayload: unkn
       return { deleted: true };
     }
     case 'images.pick': {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        throw new Error('Vui lòng cấp quyền truy cập thư viện ảnh để chọn hình món.');
+      }
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
         allowsEditing: false,
@@ -373,10 +377,25 @@ export async function handleNativeBridgeRequest(method: string, rawPayload: unkn
       }
 
       const asset = result.assets[0];
+      const actions: ImageManipulator.Action[] = [];
+      const w = asset.width || 0;
+      const h = asset.height || 0;
+      if (w > 0 && h > 0) {
+        const minSide = Math.min(w, h);
+        const maxSide = Math.max(w, h);
+        if (minSide > 900) {
+          if (w <= h) actions.push({ resize: { width: Math.max(900, Math.round((w / h) * 1800)) } });
+          else actions.push({ resize: { height: Math.max(900, Math.round((h / w) * 1800)) } });
+        } else if (maxSide > 1800) {
+          actions.push(w >= h ? { resize: { width: 1800 } } : { resize: { height: 1800 } });
+        }
+      } else {
+        actions.push({ resize: { width: 1000 } });
+      }
       const manip = await ImageManipulator.manipulateAsync(
         asset.uri,
-        [{ resize: { width: 800 } }],
-        { compress: 0.75, format: ImageManipulator.SaveFormat.JPEG, base64: true },
+        actions,
+        { compress: 0.78, format: ImageManipulator.SaveFormat.JPEG, base64: true },
       );
 
       if (!manip.base64) {

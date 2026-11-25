@@ -195,8 +195,14 @@ function requestNative(method, payload) {
       reject(new Error('Yêu cầu xử lý quá thời gian. Thử lại khi thiết bị sẵn sàng.'));
     }, 20000);
     state.pending.set(id, { resolve, reject, timer });
+    try {
+      window.ReactNativeWebView.postMessage(JSON.stringify(message));
+    } catch (error) {
+      clearTimeout(timer);
+      state.pending.delete(id);
+      reject(error instanceof Error ? error : new Error('Không thể gửi yêu cầu tới ứng dụng.'));
+    }
   });
-  window.ReactNativeWebView.postMessage(JSON.stringify(message));
   return promise;
 }
 
@@ -330,15 +336,15 @@ function hideOverlay(el) {
   if (document.activeElement instanceof HTMLElement && el.contains(document.activeElement)) {
     document.activeElement.blur();
   }
-  if (el._ftHideTimer) {
-    clearTimeout(el._ftHideTimer);
-    el._ftHideTimer = null;
-  }
-  if (el._ftSnapTimer) {
-    clearTimeout(el._ftSnapTimer);
-    el._ftSnapTimer = null;
-  }
   if (el.dataset.ftDraggedOut) {
+    if (el._ftHideTimer) {
+      clearTimeout(el._ftHideTimer);
+      el._ftHideTimer = null;
+    }
+    if (el._ftSnapTimer) {
+      clearTimeout(el._ftSnapTimer);
+      el._ftSnapTimer = null;
+    }
     delete el.dataset.ftDraggedOut;
     delete el.dataset.ftClosing;
     el.classList.add('hidden');
@@ -347,6 +353,14 @@ function hideOverlay(el) {
     return;
   }
   if (el.classList.contains('hidden') || el.dataset.ftClosing) return;
+  if (el._ftHideTimer) {
+    clearTimeout(el._ftHideTimer);
+    el._ftHideTimer = null;
+  }
+  if (el._ftSnapTimer) {
+    clearTimeout(el._ftSnapTimer);
+    el._ftSnapTimer = null;
+  }
   el.dataset.ftClosing = '1';
   resetSheetDragStyles(el, false);
   el.classList.add('ft-overlay-out');

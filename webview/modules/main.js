@@ -273,7 +273,7 @@ window.__ftHandleHardwareBack = function () {
   // 1. Nếu có popup / bottom sheet đang mở -> đóng lớp trên cùng trước
   for (const id of MODAL_BACK_ORDER) {
     const el = document.getElementById(id);
-    if (el && !el.classList.contains('hidden') && !el.classList.contains('ft-overlay-out')) {
+    if (el && !el.classList.contains('hidden') && !el.classList.contains('ft-overlay-out') && !el.dataset.ftClosing) {
       modalClosers[id]?.();
       _lastHardwareBackAt = 0;
       return;

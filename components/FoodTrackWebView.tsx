@@ -87,7 +87,7 @@ export function FoodTrackWebView() {
       if (character === '<') return '\\u003c';
       return character === '\u2028' ? '\\u2028' : '\\u2029';
     });
-    webView.current?.injectJavaScript(`window.__foodTrackResolve(${serialized}); true;`);
+    webView.current?.injectJavaScript(`window.__foodTrackResolve && window.__foodTrackResolve(${serialized}); true;`);
     setRepaintTick((tick) => tick + 1);
   }, []);
 

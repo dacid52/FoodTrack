@@ -180,10 +180,11 @@ async function openTxDetailModal(transaction) {
   try {
     const detail = await requestNative('history.detail', { id: transaction.id });
     if (reqId !== _txDetailReqId) return;
-    state.currentTx = { ...transaction, detail };
-    const income = transaction.amount > 0;
-    const isOrder = transaction.type === 'order';
-    const isImport = transaction.type === 'cost_import';
+    const tx = { ...transaction, ...detail, detail };
+    state.currentTx = tx;
+    const income = tx.amount > 0;
+    const isOrder = tx.type === 'order';
+    const isImport = tx.type === 'cost_import';
     const badgeEl = document.getElementById('tx-modal-type-badge');
     if (badgeEl) {
       badgeEl.textContent = income ? 'Đơn hàng thành công' : isImport ? 'Chi tiền nhập hàng' : 'Chi phí khác';
@@ -195,13 +196,13 @@ async function openTxDetailModal(transaction) {
     }
     const amtEl = document.getElementById('tx-modal-amount');
     if (amtEl) {
-      amtEl.textContent = `${income ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ`;
+      amtEl.textContent = `${income ? '+' : '−'}${formatMoney(Math.abs(tx.amount))} đ`;
       amtEl.className = `text-2xl font-extrabold mt-1.5 tabular-nums ${income ? 'text-emerald-600' : 'text-orange-600'}`;
     }
-    setText('tx-modal-title', transaction.title);
-    setText('tx-modal-time', formatDateTimeVi(transaction.occurred_at) || formatTime(transaction.occurred_at));
-    setText('tx-modal-method', transaction.method);
-    setText('tx-modal-id', transaction.id);
+    setText('tx-modal-title', tx.title);
+    setText('tx-modal-time', formatDateTimeVi(tx.occurred_at) || formatTime(tx.occurred_at));
+    setText('tx-modal-method', tx.method);
+    setText('tx-modal-id', tx.id);
     document.getElementById('tx-modal-desc-wrap')?.classList.toggle('hidden', isOrder);
     document.getElementById('tx-modal-items-wrap')?.classList.toggle('hidden', !isOrder);
     if (isOrder) {
@@ -210,7 +211,7 @@ async function openTxDetailModal(transaction) {
       setText('tx-modal-desc', detail.items || '—');
     }
     const actions = document.getElementById('tx-modal-actions');
-    const editable = isSameDayTransaction(transaction);
+    const editable = isSameDayTransaction(tx);
     setText('tx-modal-delete-label', isOrder ? 'Xóa đơn' : 'Xóa chi phí');
     actions?.classList.toggle('hidden', !editable);
     actions?.classList.toggle('flex', editable);
