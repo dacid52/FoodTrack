@@ -65,8 +65,7 @@ function renderDashboard(animateList) {
   setMetric('dash-revenue-val', summary.revenue, 'income', subSizeCls);
   setMetric('dash-cost-goods', summary.purchases, 'expense', subSizeCls);
   setMetric('dash-cost-other', summary.other, 'other', subSizeCls);
-  const dateNode = document.querySelector('#view-dashboard h2')?.parentElement?.querySelector('p');
-  if (dateNode) dateNode.textContent = `Hôm nay • ${localDate().split('-').reverse().join('/')}`;
+  setText('dash-date-label', `Hôm nay • ${localDate().split('-').reverse().join('/')}`);
   const hour = new Date().getHours();
   const greeting = hour >= 5 && hour < 11
     ? 'Mở hàng đắt khách!'

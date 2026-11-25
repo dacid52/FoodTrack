@@ -3,7 +3,7 @@
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-base font-bold text-neutral-900">Lịch sử giao dịch</h2>
-          <p class="text-[11px] text-neutral-500 font-medium" id="history-period-summary">Hôm nay • 25/11/2026</p>
+          <p class="text-[11px] text-neutral-500 font-medium" id="history-period-summary">Hôm nay</p>
         </div>
         <button class="px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-neutral-900 text-white flex items-center gap-1 active:scale-95 transition-all shadow-sm" onclick="openExpenseModal('import')">
           <span class="material-symbols-outlined text-[15px]">add</span>
@@ -21,7 +21,7 @@
           <button type="button" class="flex-1 min-w-0 h-9 flex items-center justify-between gap-2 bg-neutral-50 border border-neutral-200/80 rounded-xl px-3 hover:bg-neutral-100/70 active:scale-[0.99] transition-all" id="hist-picker-trigger" onclick="openHistoryDatePicker()">
             <span class="flex items-center gap-2 min-w-0">
               <span class="material-symbols-outlined text-[16px] text-neutral-400 shrink-0">calendar_month</span>
-              <span class="text-xs font-bold text-neutral-800 whitespace-nowrap tabular-nums" id="hist-picker-label">26/11/2026</span>
+              <span class="text-xs font-bold text-neutral-800 whitespace-nowrap tabular-nums" id="hist-picker-label">—</span>
             </span>
             <span class="material-symbols-outlined text-[16px] text-neutral-400 shrink-0">expand_more</span>
           </button>
@@ -65,115 +65,5 @@
       </div>
 
       <!-- Danh sách thẻ giao dịch cập nhật theo khoảng thời gian -->
-      <div class="space-y-2" id="history-items-list"><div class="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-sm flex items-start justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.99] transition-all">
-        <div class="flex items-start gap-3 flex-1 min-w-0 pr-2">
-          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-            <span class="material-symbols-outlined text-[18px]">point_of_sale</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-xs font-bold text-neutral-900">Đơn hàng #038</span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-emerald-50 text-emerald-700">Đơn hàng</span>
-            </div>
-            <p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">Cá viên chiên mắm x2, Trà tắc khổng lồ x1</p>
-            <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
-              <span>11:24 - Hôm nay</span>
-              <span>•</span>
-              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
-            </div>
-          </div>
-        </div>
-        <div class="text-right shrink-0">
-          <span class="text-xs font-extrabold text-emerald-600">+75.000 đ</span>
-          <span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span>
-        </div>
-      </div><div class="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-sm flex items-start justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.99] transition-all">
-        <div class="flex items-start gap-3 flex-1 min-w-0 pr-2">
-          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-            <span class="material-symbols-outlined text-[18px]">point_of_sale</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-xs font-bold text-neutral-900">Đơn hàng #037</span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-emerald-50 text-emerald-700">Đơn hàng</span>
-            </div>
-            <p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">Gà rán giòn rụm x1, Trà tắc x1</p>
-            <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
-              <span>11:15 - Hôm nay</span>
-              <span>•</span>
-              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Chuyển khoản</span>
-            </div>
-          </div>
-        </div>
-        <div class="text-right shrink-0">
-          <span class="text-xs font-extrabold text-emerald-600">+50.000 đ</span>
-          <span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span>
-        </div>
-      </div><div class="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-sm flex items-start justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.99] transition-all">
-        <div class="flex items-start gap-3 flex-1 min-w-0 pr-2">
-          <div class="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0 mt-0.5">
-            <span class="material-symbols-outlined text-[18px]">inventory_2</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-xs font-bold text-neutral-900">Nhập cá viên &amp; gà tươi</span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-orange-50 text-orange-700">Tiền nhập hàng</span>
-            </div>
-            <p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">Chợ đầu mối: 10kg cá viên, 5kg đùi gà</p>
-            <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
-              <span>09:30 - Hôm nay</span>
-              <span>•</span>
-              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
-            </div>
-          </div>
-        </div>
-        <div class="text-right shrink-0">
-          <span class="text-xs font-extrabold text-orange-600">-350.000 đ</span>
-          <span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span>
-        </div>
-      </div><div class="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-sm flex items-start justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.99] transition-all">
-        <div class="flex items-start gap-3 flex-1 min-w-0 pr-2">
-          <div class="w-9 h-9 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center shrink-0 mt-0.5">
-            <span class="material-symbols-outlined text-[18px]">receipt_long</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-xs font-bold text-neutral-900">Mua đá bi &amp; bao bì</span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-neutral-100 text-neutral-700">Chi phí khác</span>
-            </div>
-            <p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">2 bao đá bi và 1 bịch ly giấy mang về</p>
-            <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
-              <span>08:45 - Hôm nay</span>
-              <span>•</span>
-              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
-            </div>
-          </div>
-        </div>
-        <div class="text-right shrink-0">
-          <span class="text-xs font-extrabold text-orange-600">-40.000 đ</span>
-          <span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span>
-        </div>
-      </div><div class="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-sm flex items-start justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.99] transition-all">
-        <div class="flex items-start gap-3 flex-1 min-w-0 pr-2">
-          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
-            <span class="material-symbols-outlined text-[18px]">point_of_sale</span>
-          </div>
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="text-xs font-bold text-neutral-900">Đơn hàng #036</span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded font-bold bg-emerald-50 text-emerald-700">Đơn hàng</span>
-            </div>
-            <p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">Bò viên chiên x2, Bánh tráng nướng x2</p>
-            <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
-              <span>08:20 - Hôm nay</span>
-              <span>•</span>
-              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
-            </div>
-          </div>
-        </div>
-        <div class="text-right shrink-0">
-          <span class="text-xs font-extrabold text-emerald-600">+90.000 đ</span>
-          <span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span>
-        </div>
-      </div></div>
+      <div class="space-y-2" id="history-items-list"></div>
     </section>

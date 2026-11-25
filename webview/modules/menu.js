@@ -55,6 +55,7 @@ async function toggleProductStatus(id, active) {
   product.active = active;
   renderMenuItems();
   renderSalesProducts();
+  renderCartUI();
   try {
     await runWrite('products.active', { id, active });
   } catch (error) {
@@ -64,6 +65,7 @@ async function toggleProductStatus(id, active) {
       product.active = previousActive;
       renderMenuItems();
       renderSalesProducts();
+      renderCartUI();
       reportError(refreshError);
     }
     reportError(error);
@@ -309,7 +311,7 @@ function openImageCropModal(dataUri) {
 
 function confirmImageCrop() {
   const img = crop.img;
-  if (!img) { closeImageCropModal(); return; }
+  if (!img || !crop.view || !img.naturalWidth || !img.naturalHeight) { closeImageCropModal(); return; }
   try {
     const v = crop.view;
     const out = 800;

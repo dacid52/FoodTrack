@@ -13,7 +13,7 @@ function renderSalesProducts(popProductId) {
       : state.products.some((product) => product.active)
         ? 'Không tìm thấy món.'
         : 'Chưa có món đang bán.';
-    grid.innerHTML = `<div class="col-span-2 py-12 text-center text-neutral-400"><p class="text-xs">${emptyMessage}</p></div>`;
+    grid.innerHTML = `<div class="col-span-full py-12 text-center text-neutral-400"><p class="text-xs">${emptyMessage}</p></div>`;
     return;
   }
   products.forEach((product) => {

@@ -78,6 +78,10 @@ async function refreshAll() {
   state.dailyHistory = data.dailyHistory;
   state.summaries = data.summaries;
   state.previousSummaries.today = data.summaries.yesterday;
+  if (state.historyDaySub === 'today') {
+    state.historyCustomDate = localDate();
+  }
+  if (typeof clearHistoryActivityCache === 'function') clearHistoryActivityCache();
   renderDashboard();
   renderSalesProducts();
   renderCartUI();
@@ -199,8 +203,17 @@ document.addEventListener('focusin', (event) => {
   }, 160);
 });
 
-// Đồng bộ lại vị trí các thanh trượt pill khi kích thước WebView thay đổi
+// Đồng bộ lại vị trí các thanh trượt pill khi kích thước WebView thực sự thay đổi
+// (Bỏ qua sự kiện resize giả lập từ scheduleRepaint để không làm nhảy trang khi đang gõ)
+let _lastViewportW = window.innerWidth;
+let _lastViewportH = window.innerHeight;
 window.addEventListener('resize', () => {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  if (w === _lastViewportW && h === _lastViewportH) return;
+  const heightChanged = h !== _lastViewportH;
+  _lastViewportW = w;
+  _lastViewportH = h;
   if (state.currentTab === 'dashboard') updateDashFilterPill();
   if (state.currentTab === 'stats') updateStatsTabPill();
   if (state.currentTab === 'history') { updateHistTimePill(); updateHistFilterPill(); }
@@ -211,11 +224,13 @@ window.addEventListener('resize', () => {
   if (!document.getElementById('sales-cart-sheet')?.classList.contains('hidden')) {
     positionSlidingPill('sheet-pay-pill', `sheet-pay-${state.paymentMethod}`);
   }
-  const activeEl = document.activeElement;
-  if (activeEl instanceof HTMLElement && activeEl.matches('input, textarea, select')) {
-    setTimeout(() => {
-      try { activeEl.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {}
-    }, 60);
+  if (heightChanged) {
+    const activeEl = document.activeElement;
+    if (activeEl instanceof HTMLElement && activeEl.matches('input, textarea, select')) {
+      setTimeout(() => {
+        try { activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch {}
+      }, 60);
+    }
   }
 });
 

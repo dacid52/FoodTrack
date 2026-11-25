@@ -530,7 +530,9 @@ async function refreshStats() {
       }
       renderDualBarChart(points, defaultIdx);
     }
-  } catch (error) { reportError(error); }
+  } catch (error) {
+    if (reqId === _statsRefreshReqId) reportError(error);
+  }
 }
 
 function changeStatsMonth(delta) {

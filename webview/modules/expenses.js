@@ -173,9 +173,13 @@ function renderTxModalItems(items) {
   });
 }
 
+let _txDetailReqId = 0;
+
 async function openTxDetailModal(transaction) {
+  const reqId = ++_txDetailReqId;
   try {
     const detail = await requestNative('history.detail', { id: transaction.id });
+    if (reqId !== _txDetailReqId) return;
     state.currentTx = { ...transaction, detail };
     const income = transaction.amount > 0;
     const isOrder = transaction.type === 'order';
@@ -211,7 +215,9 @@ async function openTxDetailModal(transaction) {
     actions?.classList.toggle('hidden', !editable);
     actions?.classList.toggle('flex', editable);
     showOverlay(document.getElementById('tx-detail-modal'));
-  } catch (error) { reportError(error); }
+  } catch (error) {
+    if (reqId === _txDetailReqId) reportError(error);
+  }
 }
 
 function closeTxDetailModal() { hideOverlay(document.getElementById('tx-detail-modal')); }
@@ -260,12 +266,15 @@ function openEditOrderModal() {
     paymentMethod: tx.detail && tx.detail.order ? tx.detail.order.payment_method : 'cash',
     items: rawItems
       .filter((item) => item.product_id)
-      .map((item) => ({
-        productId: item.product_id,
-        name: item.product_name,
-        price: Number(item.unit_price_vnd) || 0,
-        quantity: Number(item.quantity) || 1,
-      })),
+      .map((item) => {
+        const catalogProduct = state.products.find((p) => p.id === item.product_id);
+        return {
+          productId: item.product_id,
+          name: catalogProduct ? catalogProduct.name : item.product_name,
+          price: catalogProduct ? (Number(catalogProduct.price_vnd) || 0) : (Number(item.unit_price_vnd) || 0),
+          quantity: Number(item.quantity) || 1,
+        };
+      }),
   };
   const select = document.getElementById('edit-order-product-select');
   if (select) {

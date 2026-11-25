@@ -187,20 +187,79 @@ function pickHistoryYear(year) {
   void refreshHistory();
 }
 
-function buildDayActivityMap() {
+// Cache chấm hoạt động theo tháng & theo năm (từ reports.daily SQLite) để lịch luôn hiện đúng chấm ở mọi kỳ quá khứ
+const _histMonthActivityCache = new Map();
+const _histYearActiveMonthsCache = new Map();
+
+function clearHistoryActivityCache() {
+  _histMonthActivityCache.clear();
+  _histYearActiveMonthsCache.clear();
+}
+
+function buildDayActivityMap(year, month) {
   const map = new Map();
+  const cacheKey = `${year}-${String(month).padStart(2, '0')}`;
+  const cached = _histMonthActivityCache.get(cacheKey);
+  if (cached) {
+    cached.forEach((net, day) => map.set(day, net));
+  }
   const source = [...(state.transactions || []), ...(state.historyTransactions || [])];
   const seenIds = new Set();
+  const liveMap = new Map();
   source.forEach((tx) => {
     if (!tx || !tx.date || seenIds.has(tx.id)) return;
     seenIds.add(tx.id);
-    const cur = map.get(tx.date) || 0;
-    map.set(tx.date, cur + (Number(tx.amount) || 0));
+    if (!tx.date.startsWith(`${cacheKey}-`)) return;
+    liveMap.set(tx.date, (liveMap.get(tx.date) || 0) + (Number(tx.amount) || 0));
   });
+  liveMap.forEach((net, day) => map.set(day, net));
   return map;
 }
 
-function renderHistoryPickerModal(slideDir, animateSelection) {
+async function loadHistoryPickerMonthDots(year, month) {
+  const mPad = String(month).padStart(2, '0');
+  const cacheKey = `${year}-${mPad}`;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const from = `${cacheKey}-01`;
+  const to = `${cacheKey}-${String(daysInMonth).padStart(2, '0')}`;
+  try {
+    const rows = await requestNative('reports.daily', { from, to, limit: 35 });
+    const monthMap = new Map();
+    (rows || []).forEach((r) => {
+      if (!r || !r.day) return;
+      const rev = Number(r.revenue) || 0;
+      const cost = (Number(r.purchases) || 0) + (Number(r.other) || 0);
+      if (rev > 0 || cost > 0) monthMap.set(r.day, rev - cost);
+    });
+    _histMonthActivityCache.set(cacheKey, monthMap);
+    const modal = document.getElementById('history-date-picker-modal');
+    if (modal && !modal.classList.contains('hidden') && state.historyTimeMode === 'day'
+      && _histPickerViewYear === year && _histPickerViewMonth === month) {
+      renderHistoryPickerModal(null, false, true);
+    }
+  } catch {}
+}
+
+async function loadHistoryPickerYearMonths(year) {
+  try {
+    const rows = await requestNative('reports.daily', { from: `${year}-01-01`, to: `${year}-12-31`, limit: 366 });
+    const activeSet = new Set();
+    (rows || []).forEach((r) => {
+      if (!r || !r.day) return;
+      const rev = Number(r.revenue) || 0;
+      const cost = (Number(r.purchases) || 0) + (Number(r.other) || 0);
+      if (rev > 0 || cost > 0) activeSet.add(Number(r.day.slice(5, 7)));
+    });
+    _histYearActiveMonthsCache.set(String(year), activeSet);
+    const modal = document.getElementById('history-date-picker-modal');
+    if (modal && !modal.classList.contains('hidden') && state.historyTimeMode === 'month'
+      && _histPickerViewYear === year) {
+      renderHistoryPickerModal(null, false, true);
+    }
+  } catch {}
+}
+
+function renderHistoryPickerModal(slideDir, animateSelection, skipFetch) {
   const body = document.getElementById('hist-picker-body');
   const nav = document.getElementById('hist-picker-modal-nav');
   const nextBtn = document.getElementById('hist-picker-modal-next');
@@ -240,7 +299,8 @@ function renderHistoryPickerModal(slideDir, animateSelection) {
     const prevMonthDays = new Date(_histPickerViewYear, _histPickerViewMonth - 1, 0).getDate();
     const startOffset = (firstDay.getDay() + 6) % 7; // T2 = 0 .. CN = 6
     const totalCells = 42; // Cố định luôn 6 hàng (42 ô) để cửa sổ lịch không bao giờ dịch lên xuống khi lật tháng
-    const activity = buildDayActivityMap();
+    const activity = buildDayActivityMap(_histPickerViewYear, _histPickerViewMonth);
+    if (!skipFetch) void loadHistoryPickerMonthDots(_histPickerViewYear, _histPickerViewMonth);
 
     const weekdaysHtml = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']
       .map((w, i) => `<div class="text-center text-[10px] font-bold py-1 ${i >= 5 ? 'text-orange-400/90' : 'text-neutral-400'}">${w}</div>`)
@@ -308,11 +368,11 @@ function renderHistoryPickerModal(slideDir, animateSelection) {
     yearBadge?.classList.add('hidden');
     if (nextBtn) nextBtn.disabled = _histPickerViewYear >= now.getFullYear();
 
-    const activeMonths = new Set(
-      [...(state.transactions || []), ...(state.historyTransactions || [])]
-        .filter((t) => t && t.date && t.date.startsWith(`${_histPickerViewYear}-`))
-        .map((t) => Number(t.date.slice(5, 7)))
-    );
+    const activeMonths = new Set(_histYearActiveMonthsCache.get(String(_histPickerViewYear)) || []);
+    [...(state.transactions || []), ...(state.historyTransactions || [])]
+      .filter((t) => t && t.date && t.date.startsWith(`${_histPickerViewYear}-`))
+      .forEach((t) => activeMonths.add(Number(t.date.slice(5, 7))));
+    if (!skipFetch) void loadHistoryPickerYearMonths(_histPickerViewYear);
 
     let html = `<div class="grid grid-cols-3 gap-2 pt-1 ${animCls}">`;
     for (let m = 1; m <= 12; m += 1) {
@@ -400,9 +460,13 @@ async function refreshHistory() {
   updateHistFilterPill();
   updateHistoryPeriodBar();
   try {
-    const rows = await requestNative('history.list', { ...range, limit: 200 });
+    const [rows, summary] = await Promise.all([
+      requestNative('history.list', { ...range, limit: 200 }),
+      requestNative('reports.summary', range),
+    ]);
     if (reqId !== _historyRefreshReqId) return;
     state.historyTransactions = rows;
+    state.historySummary = { ...summary, _key: `${range.from}_${range.to}` };
     renderHistoryView();
   } catch (error) {
     if (reqId === _historyRefreshReqId) reportError(error);
@@ -417,10 +481,12 @@ function renderHistoryView() {
   updateHistoryPeriodBar();
 
   const range = historyRange();
+  const rangeKey = `${range.from}_${range.to}`;
   const filteredByDate = state.historyTransactions.filter((item) => item.date >= range.from && item.date <= range.to);
-  const revenue = filteredByDate.filter((item) => item.amount > 0).reduce((sum, item) => sum + item.amount, 0);
-  const cost = -filteredByDate.filter((item) => item.amount < 0).reduce((sum, item) => sum + item.amount, 0);
-  const profit = revenue - cost;
+  const summaryData = state.historySummary && state.historySummary._key === rangeKey ? state.historySummary : null;
+  const revenue = summaryData ? (Number(summaryData.revenue) || 0) : filteredByDate.filter((item) => item.amount > 0).reduce((sum, item) => sum + item.amount, 0);
+  const cost = summaryData ? ((Number(summaryData.purchases) || 0) + (Number(summaryData.other) || 0)) : -filteredByDate.filter((item) => item.amount < 0).reduce((sum, item) => sum + item.amount, 0);
+  const profit = summaryData ? (Number(summaryData.profit) || 0) : (revenue - cost);
 
   const revEl = document.getElementById('hist-sum-revenue');
   if (revEl) {

@@ -8,6 +8,7 @@ const state = {
   products: [],
   transactions: [],
   historyTransactions: [],
+  historySummary: null,
   dailyHistory: [],
   summaries: {},
   previousSummaries: {},
@@ -360,8 +361,10 @@ function clearSampleContent() {
     .forEach((id) => { const node = document.getElementById(id); if (node) node.replaceChildren(); });
   ['dash-profit-val', 'dash-revenue-val', 'dash-cost-goods', 'dash-cost-other',
     'stats-net-revenue', 'stats-total-revenue', 'stats-cost-goods',
-    'stats-cost-other', 'hist-sum-revenue', 'hist-sum-cost', 'hist-sum-profit']
+    'stats-cost-other']
     .forEach((id) => { const node = document.getElementById(id); if (node) node.textContent = '0'; });
+  ['hist-sum-revenue', 'hist-sum-cost', 'hist-sum-profit']
+    .forEach((id) => { const node = document.getElementById(id); if (node) node.textContent = '0 đ'; });
   ['dash-order-count-badge', 'stats-total-orders'].forEach((id) => {
     const node = document.getElementById(id);
     if (node) node.textContent = '0 đơn';
