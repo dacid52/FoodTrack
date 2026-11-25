@@ -169,7 +169,11 @@ async function saveMenuItem() {
   finally { setBusy(false); }
 }
 
+let _pickingImage = false;
+
 async function pickProductImage() {
+  if (_pickingImage) return;
+  _pickingImage = true;
   try {
     const result = await requestNative('images.pick');
     if (result.canceled) return;
@@ -178,6 +182,7 @@ async function pickProductImage() {
     }
     openImageCropModal(result.imageUri);
   } catch (error) { reportError(error); }
+  finally { _pickingImage = false; }
 }
 
 // --- Image crop: kéo để di chuyển, slider phóng to, xuất vuông 800x800 ---
@@ -250,8 +255,8 @@ function openImageCropModal(dataUri) {
       if (pt) { pt.x = event.clientX; pt.y = event.clientY; }
       if (crop.pinch) {
         const p = pinchPoints();
-        if (!p || p.dist === 0) return;
         const prev = crop.pinch;
+        if (!p || p.dist < 1 || !prev || prev.dist < 1) return;
         const rect = viewport.getBoundingClientRect();
         zoomAt(prev.mx - rect.left, prev.my - rect.top, crop.scale * (p.dist / prev.dist));
         crop.x += p.mx - prev.mx;
@@ -339,7 +344,11 @@ function confirmImageCrop() {
 function closeImageCropModal() {
   hideOverlay(document.getElementById('image-crop-modal'));
   const img = document.getElementById('crop-image');
-  if (img) img.removeAttribute('src');
+  if (img) {
+    img.onload = null;
+    img.onerror = null;
+    img.removeAttribute('src');
+  }
   crop.img = null;
 }
 
