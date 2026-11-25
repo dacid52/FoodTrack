@@ -225,7 +225,11 @@ function closeTxDetailModal() { hideOverlay(document.getElementById('tx-detail-m
 // --- Sửa / xóa đơn hàng & khoản chi trong ngày ---
 function promptDeleteOrder() {
   const tx = state.currentTx;
-  if (!tx || !isSameDayTransaction(tx)) return;
+  if (!tx) return;
+  if (!isSameDayTransaction(tx)) {
+    showToast('Chỉ sửa/xóa được giao dịch trong ngày hôm nay.', 'info');
+    return;
+  }
   const isOrder = tx.type === 'order';
   setText('delete-order-confirm-title', isOrder ? 'Xóa đơn hàng này?' : 'Xóa khoản chi này?');
   setText('delete-order-confirm-btn-label', isOrder ? 'Xóa đơn' : 'Xóa chi phí');
@@ -254,7 +258,11 @@ async function executeDeleteOrder() {
 
 function openEditOrderModal() {
   const tx = state.currentTx;
-  if (!tx || !isSameDayTransaction(tx)) return;
+  if (!tx) return;
+  if (!isSameDayTransaction(tx)) {
+    showToast('Chỉ sửa/xóa được giao dịch trong ngày hôm nay.', 'info');
+    return;
+  }
   if (tx.type !== 'order') {
     openEditExpenseModal(tx);
     return;

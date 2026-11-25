@@ -52,6 +52,18 @@ function updateHistoryPeriodBar() {
   }
 }
 
+function clampHistoryMonthToNow() {
+  const now = new Date();
+  const curY = now.getFullYear();
+  const curM = now.getMonth() + 1;
+  if (state.historySelectedYear > curY) {
+    state.historySelectedYear = curY;
+    state.historySelectedMonth = curM;
+  } else if (state.historySelectedYear === curY && state.historySelectedMonth > curM) {
+    state.historySelectedMonth = curM;
+  }
+}
+
 function setHistoryTimeMode(mode) {
   const normalized = ['day', 'month', 'year'].includes(mode) ? mode : 'day';
   state.historyTimeMode = normalized;
@@ -62,6 +74,7 @@ function setHistoryTimeMode(mode) {
       : 'flex-1 relative py-1 rounded-lg text-neutral-500 hover:text-neutral-900 text-center text-[11px] font-medium whitespace-nowrap transition-colors';
   });
   if (normalized === 'day' && !state.historyCustomDate) state.historyCustomDate = localDate();
+  if (normalized === 'month') clampHistoryMonthToNow();
   updateHistTimePill();
   updateHistoryPeriodBar();
   void refreshHistory();
@@ -102,6 +115,7 @@ function jumpHistoryToCurrent(inPicker) {
     _histPickerViewYear = now.getFullYear();
   } else {
     state.historySelectedYear = now.getFullYear();
+    clampHistoryMonthToNow();
   }
   if (inPicker) renderHistoryPickerModal(null, true);
   updateHistoryPeriodBar();
@@ -177,6 +191,7 @@ function pickHistoryYear(year) {
   const now = new Date();
   if (year > now.getFullYear()) return;
   state.historySelectedYear = year;
+  clampHistoryMonthToNow();
   renderHistoryPickerModal(null, true);
   updateHistoryPeriodBar();
   void refreshHistory();
@@ -441,12 +456,12 @@ function setHistoryFilter(filter) {
       : 'flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 whitespace-nowrap text-center transition-colors';
   });
   updateHistFilterPill();
-  renderHistoryView();
+  renderHistoryView(true);
 }
 
 function filterHistoryList() {
   state.historySearchQuery = document.getElementById('history-search-input')?.value.toLowerCase().trim() || '';
-  renderHistoryView();
+  renderHistoryView(false);
 }
 
 let _historyRefreshReqId = 0;
@@ -471,7 +486,7 @@ async function refreshHistory() {
   }
 }
 
-function renderHistoryView() {
+function renderHistoryView(animateList = true) {
   const listNode = document.getElementById('history-items-list');
   if (!listNode) return;
   updateHistFilterPill();
@@ -520,7 +535,7 @@ function renderHistoryView() {
   if (state.historyFilter !== 'all') transactions = transactions.filter((item) => item.type === state.historyFilter);
   if (state.historySearchQuery) {
     const query = state.historySearchQuery;
-    transactions = transactions.filter((item) => `${item.title} ${item.id} ${item.desc}`.toLowerCase().includes(query));
+    transactions = transactions.filter((item) => `${item.title || ''} ${item.id || ''} ${item.desc || ''}`.toLowerCase().includes(query));
   }
   listNode.replaceChildren();
   transactions.forEach((transaction) => {
@@ -532,8 +547,8 @@ function renderHistoryView() {
     row.addEventListener('click', () => void openTxDetailModal(transaction));
     listNode.appendChild(row);
   });
-  if (transactions.length) applyListStagger(listNode);
-  if (!transactions.length) listNode.innerHTML = '<div class="ft-stagger-item py-10 text-center text-neutral-400 bg-white rounded-2xl border border-neutral-200/60 p-4"><span class="material-symbols-outlined text-4xl text-neutral-300 mb-1">search_off</span><p class="text-xs font-semibold text-neutral-600">Không có giao dịch.</p></div>';
+  if (transactions.length && animateList) applyListStagger(listNode);
+  if (!transactions.length) listNode.innerHTML = `<div class="${animateList ? 'ft-stagger-item ' : ''}py-10 text-center text-neutral-400 bg-white rounded-2xl border border-neutral-200/60 p-4"><span class="material-symbols-outlined text-4xl text-neutral-300 mb-1">search_off</span><p class="text-xs font-semibold text-neutral-600">Không có giao dịch.</p></div>`;
 }
 
 function initializeHistoryControls() {

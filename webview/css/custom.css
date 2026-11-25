@@ -97,8 +97,8 @@ input, textarea, select {
   from { opacity: 0.4; transform: translateX(-22px); }
   to { opacity: 1; transform: translateX(0); }
 }
-.ft-tab-in-right { animation: ftTabInRight 0.24s var(--ft-spring); will-change: transform, opacity; }
-.ft-tab-in-left { animation: ftTabInLeft 0.24s var(--ft-spring); will-change: transform, opacity; }
+.ft-tab-in-right { animation: ftTabInRight 0.24s var(--ft-spring); }
+.ft-tab-in-left { animation: ftTabInLeft 0.24s var(--ft-spring); }
 
 /* Sliding pill GPU spring */
 .ft-pill {

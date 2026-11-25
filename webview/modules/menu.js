@@ -34,7 +34,7 @@ function renderMenuItems(animateList) {
 
 function filterMenuItems() {
   state.menuSearchQuery = document.getElementById('menu-search-input')?.value.trim() || '';
-  renderMenuItems(true);
+  renderMenuItems(false);
 }
 
 function setMenuStatusFilter(filter) {
