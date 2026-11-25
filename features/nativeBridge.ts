@@ -1,8 +1,4 @@
-import { getConnection, listBackups, createDriveBackup, disconnectDrive, restoreDriveBackup, synchronizeDrive, storeGoogleTokens } from '../sync/drive';
-import { signInForDrive } from '../sync/googleSignIn';
-import { getBackgroundSyncStatus, setBackgroundSyncEnabled } from '../sync/background';
-import { localDate, localDateTime } from '../database/format';
-import { newId } from '../database';
+import { localDate } from '../database/format';
 import {
   createExpense,
   createOrder,
@@ -26,7 +22,6 @@ import {
 } from './records';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
-import { BackgroundTaskStatus } from 'expo-background-task';
 import type { ExpenseCategory, PaymentMethod } from '../database/types';
 
 type Payload = Record<string, unknown>;
@@ -47,14 +42,6 @@ const nativeMethods = new Set([
   'expenses.create',
   'expenses.update',
   'expenses.delete',
-  'drive.status',
-  'drive.backups.list',
-  'drive.connect',
-  'drive.sync',
-  'drive.backup.create',
-  'drive.backup.restore',
-  'drive.disconnect',
-  'drive.autoSync.set',
   'images.pick',
 ]);
 
@@ -140,15 +127,6 @@ async function safeCall<T>(fn: () => Promise<T>, fallback: T, label: string): Pr
   }
 }
 
-async function getDeviceId(): Promise<string> {
-  let id = await readSetting('device_id');
-  if (!id) {
-    id = newId();
-    await writeSetting('device_id', id);
-  }
-  return id;
-}
-
 async function bootstrap() {
   const today = localDate();
   const monthFrom = `${today.slice(0, 7)}-01`;
@@ -160,10 +138,6 @@ async function bootstrap() {
     weekSummary,
     monthSummary,
     dailyHistory,
-    connection,
-    lastSync,
-    autoSync,
-    backgroundStatus,
     prevYesterdaySummary,
     prevWeekSummary,
   ] = await Promise.all([
@@ -174,10 +148,6 @@ async function bootstrap() {
     safeCall(() => getDashboardSummary(dateOffset(today, -6), today), defaultSummary(), 'weekSummary'),
     safeCall(() => getDashboardSummary(monthFrom, today), defaultSummary(), 'monthSummary'),
     safeCall(() => getDailyReport(dateOffset(today, -4), today, 5), [], 'dailyHistory'),
-    safeCall(() => getConnection(), null, 'getConnection'),
-    safeCall(() => readSetting('last_sync_at'), null, 'readSetting:last_sync_at'),
-    safeCall(() => readSetting('auto_sync'), 'false', 'readSetting:auto_sync'),
-    safeCall(() => getBackgroundSyncStatus(), BackgroundTaskStatus.Restricted, 'getBackgroundSyncStatus'),
     safeCall(() => getDashboardSummary(dateOffset(today, -2), dateOffset(today, -2)), defaultSummary(), 'prevYesterdaySummary'),
     safeCall(() => getDashboardSummary(dateOffset(today, -13), dateOffset(today, -7)), defaultSummary(), 'prevWeekSummary'),
   ]);
@@ -196,15 +166,6 @@ async function bootstrap() {
       today: yesterdaySummary,
       yesterday: prevYesterdaySummary,
       '7days': prevWeekSummary,
-    },
-    drive: {
-      connected: Boolean(connection),
-      email: connection?.email ?? null,
-      name: connection?.name ?? null,
-      photo: connection?.photo ?? null,
-      lastSync,
-      autoSync: autoSync === 'true',
-      backgroundStatus: backgroundStatus === BackgroundTaskStatus.Available ? 'available' : 'unavailable',
     },
   };
 }
@@ -236,15 +197,6 @@ export async function handleNativeBridgeRequest(method: string, rawPayload: unkn
             today: defaultSummary(),
             yesterday: defaultSummary(),
             '7days': defaultSummary(),
-          },
-          drive: {
-            connected: false,
-            email: null,
-            name: null,
-            photo: null,
-            lastSync: null,
-            autoSync: false,
-            backgroundStatus: 'unavailable',
           },
         };
       }
@@ -409,75 +361,6 @@ export async function handleNativeBridgeRequest(method: string, rawPayload: unkn
       await deleteExpense(id);
       return { deleted: true };
     }
-    case 'drive.status': {
-      const [connection, lastSync, lastError, autoSync, backgroundStatus] = await Promise.all([
-        getConnection(),
-        readSetting('last_sync_at'),
-        readSetting('last_sync_error'),
-        readSetting('auto_sync'),
-        getBackgroundSyncStatus(),
-      ]);
-      return {
-        connected: Boolean(connection),
-        email: connection?.email ?? null,
-        name: connection?.name ?? null,
-        photo: connection?.photo ?? null,
-        lastSync,
-        lastError,
-        autoSync: autoSync === 'true',
-        backgroundStatus: backgroundStatus === BackgroundTaskStatus.Available ? 'available' : 'unavailable',
-        backups: [],
-      };
-    }
-    case 'drive.backups.list': {
-      const connection = await getConnection();
-      if (!connection) return { backups: [] };
-      try {
-        return { backups: await listBackups() };
-      } catch (err) {
-        return { backups: [], error: err instanceof Error ? err.message : 'Không tải được danh sách sao lưu từ Drive.' };
-      }
-    }
-    case 'drive.connect': {
-      const force = Boolean(payload.force);
-      const signInResult = await signInForDrive(force);
-      if (!signInResult) return { connected: false, cancelled: true };
-      const clientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? 'foodtrack';
-      await storeGoogleTokens(signInResult.accessToken, signInResult.expiresIn, signInResult.refreshToken || undefined, clientId);
-      const [connection, lastSync, autoSync, backgroundStatus] = await Promise.all([
-        getConnection(),
-        readSetting('last_sync_at'),
-        readSetting('auto_sync'),
-        getBackgroundSyncStatus(),
-      ]);
-      return {
-        connected: true,
-        email: connection?.email ?? null,
-        name: connection?.name ?? null,
-        photo: connection?.photo ?? null,
-        lastSync,
-        lastError: null,
-        autoSync: autoSync === 'true',
-        backgroundStatus: backgroundStatus === BackgroundTaskStatus.Available ? 'available' : 'unavailable',
-        backups: [],
-      };
-    }
-    case 'drive.sync':
-      return synchronizeDrive(await getDeviceId());
-    case 'drive.backup.create':
-      return createDriveBackup(await getDeviceId());
-    case 'drive.backup.restore':
-      await restoreDriveBackup(stringValue(payload.fileId, 'Mã bản sao lưu', 200));
-      return { restored: true };
-    case 'drive.disconnect':
-      await disconnectDrive();
-      return { disconnected: true };
-    case 'drive.autoSync.set': {
-      if (typeof payload.enabled !== 'boolean') throw new Error('Trạng thái đồng bộ nền không hợp lệ.');
-      await setBackgroundSyncEnabled(payload.enabled);
-      await writeSetting('auto_sync', payload.enabled ? 'true' : 'false');
-      return { enabled: payload.enabled };
-    }
     case 'images.pick': {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
@@ -511,10 +394,5 @@ export function isBridgeWrite(method: string): boolean {
     || method.startsWith('orders.')
     || method.startsWith('expenses.')
     || method.startsWith('inventory.')
-    || method === 'drive.connect'
-    || method === 'drive.sync'
-    || method === 'drive.backup.create'
-    || method === 'drive.backup.restore'
-    || method === 'drive.disconnect'
-    || method === 'drive.autoSync.set';
+;
 }

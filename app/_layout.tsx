@@ -9,13 +9,12 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, AppState, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import 'react-native-reanimated';
 
 import { ErrorNotice } from '../components/ui';
 import { useAppStore } from '../store/useAppStore';
 import { colors } from '../theme/tokens';
-import { runDailyScheduledSync } from '../sync/background';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -47,19 +46,11 @@ export default function RootLayout() {
     if (fontsLoaded && (ready || started)) void SplashScreen.hideAsync();
   }, [fontsLoaded, ready, started]);
 
-  useEffect(() => {
-    void runDailyScheduledSync().catch(() => undefined);
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') void runDailyScheduledSync().catch(() => undefined);
-    });
-    return () => subscription.remove();
-  }, []);
-
   if (!fontsLoaded || (!ready && !started)) return null;
   if (!ready) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.canvas, gap: 16 }}>
-        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700', fontFamily: 'BeVietnamPro_700Bold' }}>Không mở được dữ liệu FoodTrack</Text>
+        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700', fontFamily: 'BeVietnamPro_700Bold' }}>Không mở được dữ liệu HaFood</Text>
         {error ? <ErrorNotice message={error} /> : null}
         <ActivityIndicator color={colors.primary} />
         <Text onPress={() => refresh().catch(() => undefined)} style={{ color: colors.primary, textAlign: 'center', fontFamily: 'BeVietnamPro_600SemiBold' }}>Thử lại</Text>
@@ -72,7 +63,6 @@ export default function RootLayout() {
       <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.canvas } }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="settings" options={{ presentation: 'card' }} />
       </Stack>
     </>
   );

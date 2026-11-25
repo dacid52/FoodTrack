@@ -20,7 +20,6 @@ erDiagram
     orders ||--o{ stock_movements : order_id
     ingredients ||--o{ stock_movements : ingredient_id
     app_settings ||--o{ } : "key/value"
-    sync_conflicts : "ghi nhận merge conflict"
 ```
 
 ## 3.3. Danh sách bảng
@@ -36,7 +35,7 @@ erDiagram
 | active | INTEGER 0/1 | đang bán? |
 | image_uri | TEXT nullable | `data:image/jpeg;base64,...` (từ images.pick) hoặc `file://` |
 | created_at / updated_at / deleted_at | TEXT ISO | soft delete |
-| revision | INTEGER | tăng mỗi update — dùng cho merge sync |
+| revision | INTEGER | tăng mỗi update |
 
 Index: `products_active_name` partial `(active,name) WHERE deleted_at IS NULL`.
 
@@ -52,7 +51,7 @@ Index: `products_active_name` partial `(active,name) WHERE deleted_at IS NULL`.
 - `recipes`: `product_id UNIQUE REFERENCES products(id)`, `notes`.
 - `recipe_ingredients`: `recipe_id`, `ingredient_id`, `quantity_micros > 0`, `UNIQUE(recipe_id, ingredient_id)`.
 
-> **Lưu ý:** schema có ingredients/recipes/stock nhưng **WebView UI hiện không có màn hình quản lý nguyên liệu/công thức**. Chúng chỉ được ghi qua: (a) `createExpense`/`updateExpense` với `ingredientId + quantityMicros` (nhập kho — bridge chấp nhận nhưng WebView `expenses.js` hiện không gửi 2 field này), (b) restore/merge snapshot, (c) code legacy native.
+> **Lưu ý:** schema có ingredients/recipes/stock nhưng **WebView UI hiện không có màn hình quản lý nguyên liệu/công thức**. Chúng chỉ được ghi qua: (a) `createExpense`/`updateExpense` với `ingredientId + quantityMicros` (nhập kho — bridge chấp nhận nhưng WebView `expenses.js` hiện không gửi 2 field này), (b) code legacy native.
 
 ### orders / order_items — đơn bán
 
@@ -72,16 +71,12 @@ Index: `products_active_name` partial `(active,name) WHERE deleted_at IS NULL`.
 
 ### app_settings — key/value
 
-Các key đang dùng: `device_id`, `last_sync_at`, `last_sync_error`, `auto_sync`.
-
-### sync_conflicts — nhật ký xung đột merge
-
-`table_name, record_id, winning_revision, losing_revision, detected_at, resolution='revision-updatedAt-deletion-tie-break'`.
+Các key đang dùng: `device_id`.
 
 ## 3.4. Soft delete & revision
 
-- **Mọi entity nghiệp vụ dùng soft delete** (`deleted_at`). `records.ts` gần như không `DELETE` vật lý — trừ `restoreSnapshot()` xóa sạch trước khi nạp lại.
-- **`revision`** tăng mỗi UPDATE — là tiêu chí merge đầu tiên khi sync (`compareRows` trong backup.ts).
+- **Mọi entity nghiệp vụ dùng soft delete** (`deleted_at`). `records.ts` gần như không `DELETE` vật lý.
+- **`revision`** tăng mỗi UPDATE.
 - Query mặc định luôn `WHERE deleted_at IS NULL`.
 
 ## 3.5. Tầng truy cập dữ liệu — `features/records.ts`
@@ -107,30 +102,7 @@ Các key đang dùng: `device_id`, `last_sync_at`, `last_sync_error`, `auto_sync
 | | `getTransactionById(id)` | tra cả 2 bảng theo id |
 | Settings | `readSetting(key)`, `writeSetting(key,value)` | upsert app_settings |
 
-## 3.6. Snapshot format (backup/sync)
-
-`snapshotTables` (database/index.ts:250) = `products, ingredients, recipes, recipe_ingredients, orders, order_items, expenses, stock_movements` — **không gồm** `app_settings`, `sync_conflicts`.
-
-`BackupSnapshot` (database/types.ts):
-
-```json
-{
-  "format": "foodtrack-backup",
-  "schemaVersion": 2,
-  "generatedAt": "ISO",
-  "deviceId": "...",
-  "tables": { "<table>": [rows...] },
-  "checksum": "SHA256 hex của JSON payload (không gồm checksum)"
-}
-```
-
-- `createSnapshot(deviceId)` — đọc toàn bộ 8 bảng (kể cả deleted rows), tính checksum SHA256 (`expo-crypto`).
-- `validateSnapshot(value)` — kiểm tra nghiêm ngặt: format/version, kiểu từng field theo `textFields`/`integerFields`/`nonNegativeFields`, range (`amount>0`, `quantity>0`, `order_number>0`...), enum (`payment_method`, `category`, `kind`), toàn vẹn tham chiếu (`assertSnapshotRelations`) và unique constraints, rồi verify checksum.
-- `restoreSnapshot(snapshot)` — transaction: `DELETE` ngược thứ tự snapshotTables rồi INSERT lại theo `rowColumns`.
-- `mergeSnapshots(local, remote)` — merge theo `id`: giữ row giống hệt; nếu khác → `compareRows` (revision → updated_at → deleted_at → JSON stringify) chọn winner, thua ghi vào `conflicts`; kết quả snapshot mới với deviceId của local.
-- `persistConflicts()` — insert vào `sync_conflicts`.
-
-## 3.7. Định dạng thời gian & số lượng
+## 3.6. Định dạng thời gian & số lượng
 
 - `localDateTime()` → `YYYY-MM-DDTHH:mm:ss` (giờ local, **không timezone**).
 - `localDate()` → `YYYY-MM-DD`.

@@ -1,8 +1,8 @@
 # 05 — Chức năng theo màn hình
 
-Toàn bộ 6 view nằm trong `assets/foodtrack/index.html` (build từ `webview/templates/`). Điều hướng bằng `switchTab(tabId)` trong `webview/modules/main.js` — toggle class `hidden`/`flex` trên `section#view-*`, cập nhật `#header-title` và style nút nav. `switchTab` hợp lệ: `dashboard, sales, menu, stats, history, settings`.
+Toàn bộ 5 view nằm trong `assets/foodtrack/index.html` (build từ `webview/templates/`). Điều hướng bằng `switchTab(tabId)` trong `webview/modules/main.js` — toggle class `hidden`/`flex` trên `section#view-*`, cập nhật `#header-title` và style nút nav. `switchTab` hợp lệ: `dashboard, sales, menu, stats, history`.
 
-`refreshAll()` (main.js) gọi `app.bootstrap` → đổ `state.products/transactions/dailyHistory/summaries/drive` → gọi render của **tất cả** view (kể cả view đang ẩn) → `checkFirstLaunch()` (onboarding).
+`refreshAll()` (main.js) gọi `app.bootstrap` → đổ `state.products/transactions/dailyHistory/summaries` → gọi render của **tất cả** view (kể cả view đang ẩn).
 
 ## 5.1. VIEW 1 — Tổng quan (`dashboard.html` + `dashboard.js`)
 
@@ -45,7 +45,7 @@ Toàn bộ 6 view nằm trong `assets/foodtrack/index.html` (build từ `webview
 ## 5.5. VIEW 5 — Lịch sử (`history.html` + `history.js`)
 
 - Bộ lọc thời gian `state.historyTimeMode`: `day | week | month | year | custom` + `historyDaySub` (today/yesterday/date) + `historyCustomDate` + `historySelectedMonth/Year`.
-- `historyRange()` → `{from,to}`; `refreshHistory()` → `history.list {...range, limit:200}` → `state.transactions` → `renderHistoryView()`.
+- `historyRange()` → `{from,to}`; `refreshHistory()` → `history.list {...range, limit:200}` → `state.historyTransactions` → `renderHistoryView()`.
 - `setHistoryFilter` + `filterHistoryList()` + `state.historySearchQuery` — lọc theo loại (đơn/chi) và text.
 - `openTxDetailModal(transaction)` (trong `expenses.js`) → `history.detail {id}` → hiển thị chi tiết: đơn hàng kèm `rawItems` (tên món × số lượng), chi phí kèm `expense`.
 - `initializeHistoryControls()` — khởi tạo select ngày/tháng/năm trong template.
@@ -58,30 +58,19 @@ Toàn bộ 6 view nằm trong `assets/foodtrack/index.html` (build từ `webview
 - `saveExpenseRecord()` → `expenses.create` `{category, amountVnd, title, note, paymentMethod, occurredAt: "YYYY-MM-DD HH:mm:ss"}` → toast + refresh.
 - **Không có UI sửa/xóa chi phí hay đơn hàng trong WebView** — bridge vẫn hỗ trợ `expenses.update/delete`, `orders.update/delete` nhưng không module nào gọi (xem [09](09-han-che.md)).
 
-## 5.7. VIEW 6 — Cài đặt (`settings.html` + `settings.js`)
+## 5.7. Modal chỉnh ảnh (`image-crop-modal` trong `modals.html` + `menu.js`)
 
-- `refreshDriveStatus(forceReloadBackups)` → `drive.status` → cập nhật: avatar/email (`#settings-user-email`), trạng thái kết nối, `lastSync`, `lastError`, `autoSync`, `backgroundStatus`, danh sách backups.
-- `connectGoogleDrive(force)` → `drive.connect {force}` → nếu `cancelled` bỏ qua; cập nhật UI + toast.
-- `handleGoogleSignIn()` (auth.js) — nút đăng nhập trên auth overlay → `drive.connect`.
-- `toggleAutoBackup()` → `drive.autoSync.set {enabled}` — bật/tắt đồng bộ nền (yêu cầu đã connect).
-- `triggerManualSync()` → `drive.sync` → toast kết quả `{file, conflicts}`.
-- `createBackup()` → `drive.backup.create` → toast.
-- `promptRestoreBackup(backup)` / `promptRestoreData()` → `#restore-confirm-modal` → `executeRestoreData()` → `drive.backup.restore {fileId}` → **replace toàn bộ DB** → refresh.
-- `promptDisconnectDrive()` → `#disconnect-confirm-modal` → `executeDisconnectDrive()` → `drive.disconnect`.
+- `pickProductImage()` → `requestNative('images.pick')` → nhận `data:image/jpeg;base64` → mở `#image-crop-modal` thay vì gán thẳng.
+- Crop: kéo 1 ngón để di chuyển, **chụm 2 ngón tay để zoom** (1x–4x) neo theo điểm giữa 2 ngón, slider `#crop-zoom` tinh chỉnh; giới hạn pan không lộ khoảng trống.
+- `confirmImageCrop()` → canvas xuất ảnh vuông 800×800 JPEG → preview `#menu-image-preview`; `closeImageCropModal()` hủy.
 
-## 5.8. Auth / Onboarding (`auth.js` + `auth.html`)
-
-- `checkFirstLaunch()` — `localStorage['foodtrack_onboarded']`; lần đầu hiện `#auth-screen` (overlay z-50) mời kết nối Google Drive, nút "Đóng" (`handleSkipLogin`) set flag + ẩn.
-- `openAuthScreen()`, `handleGoogleSignIn()` → `connectGoogleDrive()`.
-- **Lưu ý:** onboarding chỉ là UX — app dùng được hoàn toàn offline không cần Google.
-
-## 5.9. Toast & helper UI
+## 5.8. Toast & helper UI
 
 - `showToast(message, isError)` — inject vào `#toast-container`, tự xóa sau 2600ms; animation `toast-animate` trong `webview/css/custom.css`.
 - Mọi lỗi bridge → `reportError` → toast đỏ.
-- `setBusy(true/false)` — disable nút sync/xóa trong khi write.
+- `setBusy(true/false)` — disable nút trong khi write.
 
-## 5.10. Bảng method → module (tra nhanh)
+## 5.9. Bảng method → module (tra nhanh)
 
 | Module | Bridge methods dùng |
 |---|---|
@@ -92,5 +81,3 @@ Toàn bộ 6 view nằm trong `assets/foodtrack/index.html` (build từ `webview
 | expenses.js | `expenses.create`, `history.detail` |
 | stats.js | `reports.summary`, `reports.daily` |
 | history.js | `history.list` |
-| settings.js | `drive.status/connect/sync/backup.create/backup.restore/disconnect/autoSync.set` |
-| auth.js | `drive.connect` (qua connectGoogleDrive) |

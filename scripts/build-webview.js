@@ -17,7 +17,7 @@ const fontFaces = [
   `@font-face{font-family:"Be Vietnam Pro";font-style:normal;font-weight:${weight};src:url("${toDataUri(file, 'font/ttf')}") format("truetype");font-display:swap;}`,
 ).join('');
 
-const pacificoFace = `@font-face{font-family:"Pacifico";font-style:normal;font-weight:400;src:url("${toDataUri('node_modules/@expo-google-fonts/pacifico/400Regular/Pacifico_400Regular.ttf', 'font/ttf')}") format("truetype");font-display:swap;}`;
+const titanOneFace = `@font-face{font-family:"Titan One";font-style:normal;font-weight:400;src:url("${toDataUri('node_modules/@expo-google-fonts/titan-one/400Regular/TitanOne_400Regular.ttf', 'font/ttf')}") format("truetype");font-display:swap;}`;
 
 const symbols = toDataUri(
   'node_modules/@fontsource-variable/material-symbols-outlined/files/material-symbols-outlined-latin-full-normal.woff2',
@@ -34,8 +34,6 @@ const jsModules = [
   'webview/modules/expenses.js',
   'webview/modules/stats.js',
   'webview/modules/history.js',
-  'webview/modules/settings.js',
-  'webview/modules/auth.js',
   'webview/modules/main.js',
 ].map(file => read(file)).join('\n');
 
@@ -43,14 +41,12 @@ const jsModules = [
 const templatesDir = path.join(root, 'webview', 'templates');
 const templateFiles = [
   'base.html',
-  'auth.html',
   'header.html',
   'dashboard.html',
   'sales.html',
   'menu.html',
   'stats.html',
   'history.html',
-  'settings.html',
   'footer.html',
   'modals.html',
   'toast.html',
@@ -71,14 +67,14 @@ html = html.replace(
   '  <!-- MAIN SCROLLABLE VIEW CONTAINER -->\n  <main class="flex-1 overflow-y-auto hide-scrollbar relative">\n\n    <!-- ================= VIEW 1: TỔNG QUAN'
 );
 
-// Close main tag after settings section, before footer
+// Close main tag after last view section, before footer
 html = html.replace(
   '</section>\n<!-- FIXED BOTTOM TAB NAVIGATION',
   '</section>\n  </main>\n\n<!-- FIXED BOTTOM TAB NAVIGATION'
 );
 
 // Inject CSS
-const css = `${fontFaces}${pacificoFace}${symbolsFace}${read('webview/generated.css')}`;
+const css = `${fontFaces}${titanOneFace}${symbolsFace}${read('webview/generated.css')}`;
 const customCss = read('webview/css/custom.css');
 html = html.replace('<!-- FONT_FACES_CSS -->', `<style>${css}</style>`);
 html = html.replace('<!-- CUSTOM_CSS -->', `<style>${customCss}</style>`);
@@ -93,6 +89,6 @@ fs.writeFileSync(output, html);
 
 console.log(`Built offline WebView UI from templates: ${path.relative(root, output)}`);
 console.log(`  - Templates: ${templateFiles.length} files`);
-console.log(`  - JS modules: 9 files`);
+console.log(`  - JS modules: 8 files`);
 console.log(`  - CSS: font-faces + generated + custom`);
 process.exit(0);

@@ -113,15 +113,6 @@ const initialSchema = `
     updated_at TEXT NOT NULL
   );
 
-  CREATE TABLE IF NOT EXISTS sync_conflicts (
-    id TEXT PRIMARY KEY NOT NULL,
-    table_name TEXT NOT NULL,
-    record_id TEXT NOT NULL,
-    winning_revision INTEGER NOT NULL,
-    losing_revision INTEGER NOT NULL,
-    detected_at TEXT NOT NULL,
-    resolution TEXT NOT NULL
-  );
 `;
 
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
@@ -246,14 +237,3 @@ export function assertVnd(amount: number): number {
   }
   return amount;
 }
-
-export const snapshotTables = [
-  'products',
-  'ingredients',
-  'recipes',
-  'recipe_ingredients',
-  'orders',
-  'order_items',
-  'expenses',
-  'stock_movements',
-] as const;

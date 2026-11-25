@@ -1,27 +1,34 @@
 /* Custom styles for FoodTrack WebView */
 
-/* Toast animation */
+:root {
+  --ft-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ft-spring-pop: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ft-depth: 0;
+}
+
+/* Toast animation - trượt từ trên xuống khớp vị trí top-12 */
 @keyframes toastAnimate {
   0% {
     opacity: 0;
-    transform: translateY(20px) scale(0.95);
+    transform: translateY(-16px) scale(0.94);
   }
-  10% {
+  12% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
-  90% {
+  86% {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translateY(-10px) scale(0.95);
+    transform: translateY(-10px) scale(0.96);
   }
 }
 
 .toast-animate {
-  animation: toastAnimate 2.5s ease-out forwards;
+  animation: toastAnimate 2.5s var(--ft-spring) forwards;
+  will-change: transform, opacity;
 }
 
 /* Hide scrollbar but keep functionality */
@@ -37,26 +44,6 @@
 /* Touch action for better mobile experience */
 .touch-action-manipulation {
   touch-action: manipulation;
-}
-
-/* Hover protection - prevent hover states on touch devices */
-@media (hover: none) {
-  .hover-protection:hover {
-    /* Override hover styles on touch devices */
-  }
-}
-
-/* Scale transitions for active states */
-.active-scale-98 {
-  active: scale(0.98);
-}
-
-.active-scale-95 {
-  active: scale(0.95);
-}
-
-.active-scale-90 {
-  active: scale(0.90);
 }
 
 /* Spin animation for loading states */
@@ -86,4 +73,194 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* iOS-like tab transition */
+@keyframes ftTabInRight {
+  from { opacity: 0.4; transform: translateX(22px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes ftTabInLeft {
+  from { opacity: 0.4; transform: translateX(-22px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.ft-tab-in-right { animation: ftTabInRight 0.24s var(--ft-spring); will-change: transform, opacity; }
+.ft-tab-in-left { animation: ftTabInLeft 0.24s var(--ft-spring); will-change: transform, opacity; }
+
+/* Sliding pill GPU spring */
+.ft-pill {
+  transition: transform 0.26s var(--ft-spring), width 0.26s var(--ft-spring);
+  will-change: transform, width;
+}
+
+/* Badge / counter / nav icon spring pop */
+@keyframes ftPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.26); }
+  100% { transform: scale(1); }
+}
+.ft-pop {
+  animation: ftPop 0.22s var(--ft-spring-pop);
+}
+
+@keyframes ftNavPop {
+  0% { transform: scale(0.86); }
+  55% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+.ft-nav-pop {
+  animation: ftNavPop 0.26s var(--ft-spring-pop);
+}
+
+/* Micro-stagger entrance for list cards (first 8 items) */
+@keyframes ftListIn {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.ft-stagger-item {
+  animation: ftListIn 0.22s var(--ft-spring) both;
+  animation-delay: var(--ft-delay, 0ms);
+}
+
+/* Smooth slide-up / slide-down for Sales Quick Clear Cart tab */
+#btn-quick-clear-cart {
+  transform: translateY(100%) skewX(-22deg);
+  clip-path: inset(0 0 100% 0);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.28s var(--ft-spring),
+    clip-path 0.28s var(--ft-spring),
+    opacity 0.2s ease,
+    background-color 0.15s ease;
+  will-change: transform, opacity;
+}
+#btn-quick-clear-cart.ft-clear-tab-visible {
+  transform: translateY(0) skewX(-22deg);
+  clip-path: inset(0 0 0 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Background cố định hoàn toàn — không đẩy, không co, không blur */
+#app-root,
+.ft-depth-surface {
+  background-color: #fbfbf9;
+}
+
+/* Popup overlay + bottom sheet spring mượt, nền tối nhẹ trong trẻo không che mờ */
+@keyframes ftOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ftSheetUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes ftOverlayOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes ftSheetDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+[id$="-modal"], [id$="-sheet"] {
+  background-color: rgba(0, 0, 0, 0.28) !important;
+  animation: ftOverlayIn 0.2s ease-out;
+}
+#image-crop-modal {
+  background-color: rgba(0, 0, 0, 0.42) !important;
+}
+[id$="-modal"] > div:first-child, [id$="-sheet"] > div:first-child {
+  animation: ftSheetUp 0.28s var(--ft-spring);
+  transition: transform 0.26s var(--ft-spring), opacity 0.2s ease;
+  transform-origin: center bottom;
+  box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.12);
+  will-change: transform;
+}
+
+/* Chặn chạy lại animation mở cửa sổ sau khi người dùng đã chạm/kéo */
+.ft-sheet-settled,
+.ft-sheet-settled > div:first-child {
+  animation: none;
+}
+
+.ft-overlay-out { animation: ftOverlayOut 0.18s ease-in forwards; }
+.ft-overlay-out > div:first-child { animation: ftSheetDown 0.18s ease-in forwards; }
+
+/* Interactive sheet grabber & elastic bottom skirt when pulling upward */
+.ft-sheet-grabber {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.ft-sheet-grabber > div {
+  transition: width 0.2s var(--ft-spring), background-color 0.2s ease;
+}
+.ft-sheet-dragging .ft-sheet-grabber > div,
+.ft-sheet-grabber:active > div {
+  width: 3rem;
+  background-color: #a3a3a3;
+}
+.ft-sheet-dragging > div:first-child {
+  box-shadow:
+    0 64px 0 0 #ffffff,
+    0 -10px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Chart bar animations — mượt kiểu expo-out, lưới/trục đứng yên, thanh trượt mở sắc nét không méo viền */
+@keyframes ftBarRise {
+  from {
+    clip-path: inset(100% 0 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes ftBarSlideX {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+.ft-bar-rise {
+  animation: ftBarRise 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--ft-bar-delay, 0ms);
+  will-change: clip-path;
+}
+
+.ft-bar-slide {
+  animation: ftBarSlideX 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: var(--ft-bar-delay, 0ms);
+  will-change: clip-path;
+}
+
+/* Calendar month/year smooth horizontal slide */
+@keyframes ftCalInRight {
+  from { opacity: 0.3; transform: translateX(18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes ftCalInLeft {
+  from { opacity: 0.3; transform: translateX(-18px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.ft-cal-in-right { animation: ftCalInRight 0.24s var(--ft-spring); }
+.ft-cal-in-left { animation: ftCalInLeft 0.24s var(--ft-spring); }
+
+@keyframes ftCalPickPop {
+  0% { transform: scale(0.84); }
+  60% { transform: scale(1.07); }
+  100% { transform: scale(1); }
+}
+.ft-cal-pick-pop {
+  animation: ftCalPickPop 0.24s var(--ft-spring-pop);
+}
+
+/* Respect OS reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

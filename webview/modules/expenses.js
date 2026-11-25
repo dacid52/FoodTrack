@@ -2,27 +2,32 @@
 // Expenses and transaction details logic
 function openExpenseModal(type) {
   state.expenseType = type === 'other' ? 'other' : 'import';
-  setExpenseType(state.expenseType);
   const amountInput = document.getElementById('exp-amount-input');
   if (amountInput) { amountInput.value = ''; delete amountInput.dataset.raw; }
   ['exp-content-input', 'exp-note-input'].forEach((id) => { const input = document.getElementById(id); if (input) input.value = ''; });
-  setExpensePayMethod('cash');
   updateExpenseButtonText();
   document.getElementById('expense-modal')?.classList.remove('hidden');
+  setExpenseType(state.expenseType);
+  setExpensePayMethod('cash');
+  requestAnimationFrame(() => {
+    positionSlidingPill('exp-type-pill', `exp-type-${state.expenseType}`);
+    positionSlidingPill('exp-pay-pill', `exp-pay-${state.expensePayMethod}`);
+  });
 }
 
-function closeExpenseModal() { document.getElementById('expense-modal')?.classList.add('hidden'); }
+function closeExpenseModal() { hideOverlay(document.getElementById('expense-modal')); }
 
 function setExpenseType(type) {
   state.expenseType = type === 'other' ? 'other' : 'import';
   const importButton = document.getElementById('exp-type-import');
   const otherButton = document.getElementById('exp-type-other');
   if (importButton) importButton.className = state.expenseType === 'import'
-    ? 'flex-1 py-1.5 rounded-lg bg-white text-neutral-900 shadow-sm font-semibold text-center'
-    : 'flex-1 py-1.5 rounded-lg hover:text-neutral-900 font-medium text-center';
+    ? 'flex-1 relative py-1.5 rounded-lg text-neutral-900 font-semibold transition-colors text-center'
+    : 'flex-1 relative py-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 font-medium transition-colors text-center';
   if (otherButton) otherButton.className = state.expenseType === 'other'
-    ? 'flex-1 py-1.5 rounded-lg bg-white text-neutral-900 shadow-sm font-semibold text-center'
-    : 'flex-1 py-1.5 rounded-lg hover:text-neutral-900 font-medium text-center';
+    ? 'flex-1 relative py-1.5 rounded-lg text-neutral-900 font-semibold transition-colors text-center'
+    : 'flex-1 relative py-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 font-medium transition-colors text-center';
+  positionSlidingPill('exp-type-pill', `exp-type-${state.expenseType}`);
 }
 
 function setExpensePayMethod(method) {
@@ -32,110 +37,23 @@ function setExpensePayMethod(method) {
   ['cash', 'transfer', 'debt'].forEach((value) => {
     const button = document.getElementById(`exp-pay-${value}`);
     if (button) button.className = value === state.expensePayMethod
-      ? 'py-1.5 rounded-lg text-xs font-bold bg-white text-neutral-900 shadow-sm text-center'
-      : 'py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 text-center';
+      ? 'relative py-1.5 rounded-lg text-xs font-bold text-neutral-900 transition-colors text-center'
+      : 'relative py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 transition-colors text-center';
   });
+  positionSlidingPill('exp-pay-pill', `exp-pay-${state.expensePayMethod}`);
 }
 
 function formatExpenseAmountInput() {
-  const input = document.getElementById('exp-amount-input');
-  if (!input) return;
-  const digits = String(input.value || '').replace(/\D/g, '');
-  input.dataset.raw = digits;
-  input.value = digits ? Number(digits).toLocaleString('vi-VN') : '';
+  formatVndInput(document.getElementById('exp-amount-input'));
 }
 
 function expenseAmountValue() {
-  const input = document.getElementById('exp-amount-input');
-  return Number(input?.dataset.raw || String(input?.value || '').replace(/\D/g, '') || 0);
-}
-
-function addExpenseAmount(amount) {
-  const input = document.getElementById('exp-amount-input');
-  if (!input) return;
-  const next = expenseAmountValue() + amount;
-  input.dataset.raw = String(next);
-  input.value = next ? next.toLocaleString('vi-VN') : '';
-  updateExpenseButtonText();
-}
-
-const QUICK_AMOUNT_CAP = 9000000;
-
-function quickAmountLabel(value) {
-  if (value >= 1000000) {
-    const tr = value / 1000000;
-    const frac = tr - Math.floor(tr);
-    if (frac === 0) return `+${tr}tr`;
-    const digits = String(Math.round(frac * 1000)).padStart(3, '0').replace(/0+$/, '');
-    return `+${Math.floor(tr)}tr${digits}`;
-  }
-  if (value >= 1000) {
-    const k = value / 1000;
-    return Number.isInteger(k) ? `+${k}k` : `+${Math.round(k * 100) / 100}k`;
-  }
-  return `+${value}`;
-}
-
-// Nấc tiền "đẹp" d×10^n với d thuộc tập cho trước, nhỏ nhất >= value
-function niceAmountCeil(value, digits) {
-  for (let n = 3; n <= 7; n += 1) {
-    for (const d of digits) {
-      const candidate = d * 10 ** n;
-      if (candidate >= value && candidate <= QUICK_AMOUNT_CAP) return candidate;
-    }
-  }
-  return QUICK_AMOUNT_CAP;
-}
-
-// Các nấc {1,2,5}×10^n lớn hơn minExclusive
-function niceAmountsAbove(minExclusive, count) {
-  const out = [];
-  for (let n = 3; n <= 7 && out.length < count; n += 1) {
-    for (const d of [1, 2, 5]) {
-      const candidate = d * 10 ** n;
-      if (candidate > minExclusive && candidate <= QUICK_AMOUNT_CAP) out.push(candidate);
-      if (out.length >= count) break;
-    }
-  }
-  return out;
-}
-
-function quickAmountValues() {
-  const raw = expenseAmountValue();
-  if (!raw) return [50000, 100000, 200000, 500000, 1000000];
-  // Cơ sở: input×1000, chia 10 tới khi <= 20k → 5→5k, 15→15k, 90→9k, 95→9.5k, 200→20k
-  let base = raw * 1000;
-  while (base > 20000) base = Math.floor(base / 10);
-  if (base % 1000 === 0) {
-    // Base tròn nghìn: nấc đẹp tăng dần (vd 15 → 15k,30k,50k,100k,200k)
-    const second = niceAmountCeil(base * 2, [1, 2, 3, 5]);
-    return [base, second, ...niceAmountsAbove(second, 3)].slice(0, 5);
-  }
-  // Base lẻ (9.5k, 16.5k...): nhân dần ×10,×100,×200 rồi chạm cap (vd 9.5k→95k→950k→1.9tr→9tr)
-  return [base, base * 10, base * 100, base * 200, Math.min(base * 1000, QUICK_AMOUNT_CAP)];
-}
-
-function renderQuickAmounts() {
-  const container = document.getElementById('exp-quick-amounts');
-  if (!container) return;
-  const values = quickAmountValues();
-  container.replaceChildren();
-  values.forEach((value, index) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = index === values.length - 1
-      ? 'py-1 text-[10px] font-bold bg-orange-50 text-primary rounded-lg border border-orange-200 hover:bg-orange-100 active:scale-95 truncate'
-      : 'py-1 text-[10px] font-semibold bg-white rounded-lg border border-neutral-200 hover:border-primary active:scale-95 truncate';
-    button.textContent = quickAmountLabel(value);
-    button.onclick = () => addExpenseAmount(value);
-    container.appendChild(button);
-  });
+  return parseVndInput(document.getElementById('exp-amount-input'));
 }
 
 function updateExpenseButtonText() {
   const amount = expenseAmountValue();
   setText('btn-save-expense-text', amount > 0 ? `Lưu chi phí (${formatMoney(amount)} đ)` : 'Lưu chi phí');
-  renderQuickAmounts();
 }
 
 async function saveExpenseRecord() {
@@ -213,7 +131,7 @@ async function openTxDetailModal(transaction) {
   } catch (error) { reportError(error); }
 }
 
-function closeTxDetailModal() { document.getElementById('tx-detail-modal')?.classList.add('hidden'); }
+function closeTxDetailModal() { hideOverlay(document.getElementById('tx-detail-modal')); }
 
 // --- Sửa / xóa đơn hàng trong ngày ---
 function promptDeleteOrder() {
@@ -222,7 +140,7 @@ function promptDeleteOrder() {
   document.getElementById('delete-order-confirm-modal')?.classList.remove('hidden');
 }
 
-function closeDeleteOrderModal() { document.getElementById('delete-order-confirm-modal')?.classList.add('hidden'); }
+function closeDeleteOrderModal() { hideOverlay(document.getElementById('delete-order-confirm-modal')); }
 
 async function executeDeleteOrder() {
   const tx = state.currentTx;
@@ -273,7 +191,7 @@ function openEditOrderModal() {
 }
 
 function closeEditOrderModal() {
-  document.getElementById('edit-order-modal')?.classList.add('hidden');
+  hideOverlay(document.getElementById('edit-order-modal'));
   state.editingOrder = null;
 }
 

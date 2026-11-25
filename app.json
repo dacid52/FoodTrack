@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FoodTrack",
+    "name": "HaFood",
     "slug": "foodtrack",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -45,24 +45,16 @@
         }
       ],
       "expo-sqlite",
-      "expo-background-task",
-      "expo-secure-store",
-      [
-        "@react-native-google-signin/google-signin",
-        {
-          "iosUrlScheme": "com.googleusercontent.apps.948498720341-nbf8n02lerg9kg8kj697k95etvevifpc"
-        }
-      ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "Cho phép FoodTrack truy cập ảnh để thêm hình món ăn."
+          "photosPermission": "Cho phép HaFood truy cập ảnh để thêm hình món ăn."
         }
       ],
       [
         "expo-media-library",
         {
-          "photosPermission": "Cho phép FoodTrack hiển thị ảnh trên thiết bị.",
+          "photosPermission": "Cho phép HaFood hiển thị ảnh trên thiết bị.",
           "savePhotosPermission": false,
           "granularPermissions": [
             "photo"

@@ -9,6 +9,7 @@ module.exports = {
       fontFamily: {
         sans: ['"Be Vietnam Pro"', 'sans-serif'],
         script: ['Pacifico', 'cursive'],
+        display: ['"Titan One"', 'cursive'],
       },
       colors: {
         primary: { DEFAULT: '#ea580c', hover: '#c2410c', subtle: '#ffedd5' },

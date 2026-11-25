@@ -73,38 +73,3 @@ export interface StockMovement extends SyncEntity {
   note: string;
 }
 
-export interface BackupSnapshot {
-  format: 'foodtrack-backup';
-  schemaVersion: 2;
-  generatedAt: string;
-  deviceId: string;
-  tables: {
-    products: Product[];
-    ingredients: Ingredient[];
-    recipes: Recipe[];
-    recipe_ingredients: RecipeIngredient[];
-    orders: Order[];
-    order_items: OrderItem[];
-    expenses: Expense[];
-    stock_movements: StockMovement[];
-  };
-  checksum: string;
-}
-
-export interface BackupFile {
-  id: string;
-  name: string;
-  modifiedTime: string;
-  size?: string;
-  appProperties?: Record<string, string>;
-}
-
-export interface DriveConnection {
-  email: string;
-  name?: string;
-  photo?: string;
-  clientId: string;
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt: number;
-}

@@ -1,6 +1,6 @@
 # FoodTrack — Bộ tài liệu dự án
 
-Bộ tài liệu mô tả toàn bộ dự án **FoodTrack**: ứng dụng mobile quản lý bán hàng, chi phí và lợi nhuận cho quán ăn vặt, xây dựng bằng **Expo / React Native** với giao diện chính chạy trong **Android WebView offline** và lớp dữ liệu **SQLite** trên thiết bị, kèm đồng bộ sao lưu qua **Google Drive**.
+Bộ tài liệu mô tả toàn bộ dự án **HaFood** (FoodTrack): ứng dụng mobile quản lý bán hàng, chi phí và lợi nhuận cho quán ăn vặt, xây dựng bằng **Expo / React Native** với giao diện chính chạy trong **Android WebView offline** và lớp dữ liệu **SQLite** trên thiết bị. Dữ liệu lưu hoàn toàn offline, không đồng bộ cloud.
 
 Tài liệu được viết dựa trên source code thực tế tại thời điểm lập (thư mục gốc: `D:\FTrack\FoodTrack`).
 
@@ -12,11 +12,10 @@ Tài liệu được viết dựa trên source code thực tế tại thời đi
 | 2 | [02-cau-truc-thu-muc.md](02-cau-truc-thu-muc.md) | Cấu trúc thư mục, vai trò từng file/thư mục |
 | 3 | [03-co-so-du-lieu.md](03-co-so-du-lieu.md) | SQLite schema, các bảng, quan hệ, migration, tầng truy cập dữ liệu |
 | 4 | [04-webview-bridge.md](04-webview-bridge.md) | Cơ chế WebView offline, Native Bridge, luồng request/response, danh sách bridge method |
-| 5 | [05-chuc-nang.md](05-chuc-nang.md) | Toàn bộ chức năng theo từng màn hình (Dashboard, Sales, Menu, Stats, History, Settings) |
-| 6 | [06-google-drive-sync.md](06-google-drive-sync.md) | Google Sign-In, Drive API, backup/restore/sync, xung đột, đồng bộ nền |
-| 7 | [07-phat-trien-build.md](07-phat-trien-build.md) | Môi trường, chạy dev, lint/typecheck, build APK/AAB/iOS, quy trình sửa WebView + rebuild |
-| 8 | [08-debug-bao-mat.md](08-debug-bao-mat.md) | Debug/log, xử lý lỗi, quyền truy cập, bảo mật, các vấn đề đã biết |
-| 9 | [09-han-che.md](09-han-che.md) | Trạng thái hoàn thiện từng chức năng, hạn chế hiện tại, code legacy/dead code |
+| 5 | [05-chuc-nang.md](05-chuc-nang.md) | Toàn bộ chức năng theo từng màn hình (Dashboard, Sales, Menu, Stats, History) |
+| 6 | [07-phat-trien-build.md](07-phat-trien-build.md) | Môi trường, chạy dev, lint/typecheck, build APK/AAB/iOS, quy trình sửa WebView + rebuild |
+| 7 | [08-debug-bao-mat.md](08-debug-bao-mat.md) | Debug/log, xử lý lỗi, quyền truy cập, bảo mật, các vấn đề đã biết |
+| 8 | [09-han-che.md](09-han-che.md) | Trạng thái hoàn thiện từng chức năng, hạn chế hiện tại, code legacy/dead code |
 
 ## Đọc nhanh
 

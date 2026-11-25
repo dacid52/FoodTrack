@@ -27,11 +27,16 @@ function updateHeader(tabId) {
   }
 }
 
+const NAV_TAB_ORDER = ['dashboard', 'menu', 'sales', 'stats', 'history'];
+
 function switchTab(tabId) {
-  const validTabs = ['dashboard', 'sales', 'menu', 'stats', 'history', 'settings'];
+  const validTabs = ['dashboard', 'sales', 'menu', 'stats', 'history'];
   if (!validTabs.includes(tabId)) return;
+  if (tabId !== 'sales') closeCartSheet();
+  if (tabId !== 'history') closeHistoryDatePicker();
+  const previousTab = state.currentTab;
   state.currentTab = tabId;
-  const views = ['dashboard', 'sales', 'menu', 'stats', 'history', 'settings'];
+  const views = ['dashboard', 'sales', 'menu', 'stats', 'history'];
   views.forEach((id) => {
     const view = document.getElementById(`view-${id}`);
     if (view) {
@@ -40,12 +45,25 @@ function switchTab(tabId) {
     }
   });
   updateHeader(tabId);
-  if (tabId === 'dashboard') renderDashboard();
+  if (previousTab !== tabId) {
+    const activeIcon = tabId === 'sales'
+      ? document.getElementById('nav-sales-fab')
+      : document.querySelector(`#nav-btn-${tabId} .nav-icon`);
+    triggerPop(activeIcon, 'ft-nav-pop');
+  }
+  if (tabId === 'dashboard') renderDashboard(previousTab !== tabId);
   if (tabId === 'sales') { renderSalesProducts(); renderCartUI(); }
-  if (tabId === 'menu') renderMenuItems();
+  if (tabId === 'menu') renderMenuItems(previousTab !== tabId);
   if (tabId === 'stats') void refreshStats();
   if (tabId === 'history') void refreshHistory();
-  if (tabId === 'settings') void refreshDriveStatus().catch(reportError);
+  const mainEl = document.querySelector('main');
+  if (mainEl && previousTab !== tabId) {
+    mainEl.scrollTop = 0;
+    const forward = NAV_TAB_ORDER.indexOf(tabId) > NAV_TAB_ORDER.indexOf(previousTab);
+    mainEl.classList.remove('ft-tab-in-right', 'ft-tab-in-left');
+    void mainEl.offsetWidth;
+    mainEl.classList.add(forward ? 'ft-tab-in-right' : 'ft-tab-in-left');
+  }
 }
 
 function showHelpGuide() {
@@ -60,22 +78,17 @@ async function refreshAll() {
   state.dailyHistory = data.dailyHistory;
   state.summaries = data.summaries;
   state.previousSummaries.today = data.summaries.yesterday;
-  state.drive = data.drive;
-  updateDriveHeaderStatus(Boolean(state.drive && state.drive.connected));
   renderDashboard();
   renderSalesProducts();
   renderCartUI();
   renderMenuItems();
   if (state.currentTab === 'stats') await refreshStats();
   if (state.currentTab === 'history') await refreshHistory();
-  if (state.currentTab === 'settings') await refreshDriveStatus();
-  checkFirstLaunch();
 }
 
 // Global window bindings for HTML onclick handlers
 Object.assign(window, {
   addEditOrderItem,
-  addExpenseAmount,
   addToCart,
   changeStatsMonth,
   clearCart,
@@ -83,40 +96,40 @@ Object.assign(window, {
   closeCartSheet,
   closeDeleteOrderModal,
   closeDeleteProductModal,
-  closeDisconnectModal,
   closeEditOrderModal,
   closeExpenseModal,
+  closeHistoryDatePicker,
+  closeImageCropModal,
   closeMenuModal,
-  closeRestoreModal,
   closeTxDetailModal,
   confirmDeleteProduct,
+  confirmImageCrop,
   confirmOrder,
-  connectGoogleDrive,
   deleteProduct,
+  drillIntoSelectedStatsDay,
   editOrderQty,
   executeDeleteOrder,
-  executeDisconnectDrive,
-  executeRestoreData,
   filterHistoryList,
   filterMenuItems,
   filterSalesProducts,
   formatExpenseAmountInput,
-  handleGoogleSignIn,
-  handleSkipLogin,
+  formatMenuPriceInput,
+  jumpHistoryToCurrent,
+  navHistoryPicker,
   onCustomDateChange,
   onMonthSelectChange,
   onYearSelectChange,
-  openAuthScreen,
   openCartSheet,
   openEditMenuModal,
   openEditOrderModal,
   openExpenseModal,
+  openHistoryDatePicker,
+  pickHistoryDate,
+  pickHistoryMonth,
+  pickHistoryYear,
   promptDeleteOrder,
-  promptDisconnectDrive,
-  promptRestoreBackup,
-  promptRestoreData,
-  refreshDriveStatus,
   removeEditOrderItem,
+  resetStatsOffset,
   saveEditOrder,
   saveExpenseRecord,
   saveMenuItem,
@@ -129,13 +142,13 @@ Object.assign(window, {
   setHistoryTimeMode,
   setMenuStatusFilter,
   setPaymentMethod,
+  setStatsDayFilter,
   setStatsPeriod,
   showHelpGuide,
+  stepHistoryPeriod,
   switchTab,
-  toggleAutoBackup,
   toggleFormStatusLabel,
   toggleProductStatus,
-  triggerManualSync,
   updateCartQuantity,
   updateExpenseButtonText,
   updateMenuImagePreview,
@@ -163,24 +176,259 @@ function setInitialDisplay() {
 
 window.FoodTrack = { refresh: () => refreshAll().catch(reportError), switchTab };
 
+const modalClosers = {
+  'expense-modal': closeExpenseModal,
+  'menu-modal': closeMenuModal,
+  'tx-detail-modal': closeTxDetailModal,
+  'edit-order-modal': closeEditOrderModal,
+  'delete-order-confirm-modal': closeDeleteOrderModal,
+  'delete-product-modal': closeDeleteProductModal,
+  'sales-cart-sheet': closeCartSheet,
+  'history-date-picker-modal': closeHistoryDatePicker,
+  'image-crop-modal': closeImageCropModal,
+};
+
+// Đồng bộ parallax nhẹ cho nền sáng & xếp chồng modal con
+function syncModalDepth() {
+  const openModals = Object.keys(modalClosers)
+    .map((id) => document.getElementById(id))
+    .filter((el) => el && !el.classList.contains('hidden') && !el.classList.contains('ft-overlay-out'));
+  const hasOpen = openModals.length > 0;
+  document.documentElement.classList.toggle('ft-modal-open', hasOpen);
+  document.documentElement.style.setProperty('--ft-depth', hasOpen ? '1' : '0');
+  if (!hasOpen) document.documentElement.classList.remove('ft-modal-dragging');
+  Object.keys(modalClosers).forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isReceded = openModals.length > 1 && openModals.includes(el) && openModals[openModals.length - 1] !== el;
+    el.classList.toggle('ft-modal-receded', isReceded);
+  });
+}
+
+(function observeModals() {
+  const observer = new MutationObserver(() => syncModalDepth());
+  const attach = () => {
+    Object.keys(modalClosers).forEach((id) => {
+      const el = document.getElementById(id);
+      if (el && !el.dataset.ftObserved) {
+        el.dataset.ftObserved = '1';
+        observer.observe(el, { attributes: true, attributeFilter: ['class'] });
+      }
+    });
+  };
+  attach();
+  const rootObserver = new MutationObserver(() => { attach(); syncModalDepth(); });
+  const rootEl = document.getElementById('app-root') || document.body;
+  if (rootEl) rootObserver.observe(rootEl, { childList: true });
+})();
+
 // Đóng modal/sheet khi bấm ra vùng tối bên ngoài (chỉ khi target là chính backdrop)
 document.addEventListener('click', (event) => {
   const backdrop = event.target;
   if (!(backdrop instanceof HTMLElement)) return;
-  const closers = {
-    'expense-modal': closeExpenseModal,
-    'menu-modal': closeMenuModal,
-    'tx-detail-modal': closeTxDetailModal,
-    'edit-order-modal': closeEditOrderModal,
-    'delete-order-confirm-modal': closeDeleteOrderModal,
-    'delete-product-modal': closeDeleteProductModal,
-    'restore-confirm-modal': closeRestoreModal,
-    'disconnect-confirm-modal': closeDisconnectModal,
-    'sales-cart-sheet': closeCartSheet,
-  };
-  const close = closers[backdrop.id];
+  const close = modalClosers[backdrop.id];
   if (close) close();
 });
+
+// Kéo lên (đàn hồi nhẹ) / giữ kéo xuống để đóng mượt mà cho tất cả bottom sheet & modal
+(function initInteractiveSheets() {
+  let drag = null;
+
+  function findOverlay(target) {
+    let node = target instanceof HTMLElement ? target : null;
+    while (node && node !== document.body) {
+      if (node.id && modalClosers[node.id]) return node;
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  function findScrollable(target, stopAt) {
+    let node = target instanceof HTMLElement ? target : null;
+    while (node && node !== stopAt) {
+      const style = window.getComputedStyle(node);
+      if ((style.overflowY === 'auto' || style.overflowY === 'scroll') && node.scrollHeight > node.clientHeight + 1) {
+        return node;
+      }
+      node = node.parentElement;
+    }
+    return null;
+  }
+
+  function isInteractiveControl(target) {
+    return Boolean(target instanceof HTMLElement && target.closest('#crop-viewport, input, textarea, select, option'));
+  }
+
+  function startDrag(clientX, clientY, target, isMouse) {
+    const overlay = findOverlay(target);
+    if (!overlay || overlay.classList.contains('hidden') || overlay.dataset.ftClosing) return;
+    const panel = overlay.firstElementChild;
+    if (!(panel instanceof HTMLElement) || !panel.contains(target)) return;
+
+    const onGrabber = Boolean(target instanceof HTMLElement && target.closest('.ft-sheet-grabber'));
+    if (isMouse && !onGrabber) return;
+    if (!onGrabber && isInteractiveControl(target)) return;
+
+    const scrollable = onGrabber ? null : findScrollable(target, panel);
+    // Nếu đang ở giữa danh sách đã cuộn xuống thì nhường thao tác cuộn tự nhiên
+    if (scrollable && scrollable.scrollTop > 1) return;
+
+    const headerEl = panel.children[1];
+    const onHeader = Boolean(
+      headerEl instanceof HTMLElement
+      && headerEl.contains(target)
+      && !(target instanceof HTMLElement && target.closest('button, a'))
+    );
+    const baseAlpha = overlay.id === 'image-crop-modal' ? 0.42 : 0.28;
+
+    drag = {
+      overlay,
+      panel,
+      closer: modalClosers[overlay.id],
+      startX: clientX,
+      startY: clientY,
+      lastY: clientY,
+      lastTime: performance.now(),
+      velocity: 0,
+      dy: 0,
+      fromHandle: onGrabber || onHeader,
+      onGrabber,
+      scrollable,
+      baseAlpha,
+      locked: false,
+      aborted: false,
+    };
+  }
+
+  function moveDrag(clientX, clientY, event) {
+    if (!drag || drag.aborted) return;
+    const dx = clientX - drag.startX;
+    const dy = clientY - drag.startY;
+
+    if (!drag.locked) {
+      if (Math.hypot(dx, dy) < 6) return;
+      if (Math.abs(dx) > Math.abs(dy) * 1.15) {
+        drag.aborted = true;
+        return;
+      }
+      if (!drag.fromHandle) {
+        if (drag.scrollable && drag.scrollable.scrollTop > 1) {
+          drag.aborted = true;
+          return;
+        }
+        // Vuốt lên bên trong nội dung cuộn được -> nhường cuộn tự nhiên
+        if (dy < 0 && drag.scrollable) {
+          drag.aborted = true;
+          return;
+        }
+      }
+      drag.locked = true;
+      drag.overlay.classList.add('ft-sheet-settled', 'ft-sheet-dragging');
+      document.documentElement.classList.add('ft-modal-dragging');
+      drag.panel.style.transition = 'none';
+      drag.overlay.style.transition = 'none';
+      // Nếu đang mở bàn phím khi kéo đóng, ẩn bàn phím gọn gàng
+      if (dy > 0 && document.activeElement instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName)) {
+        document.activeElement.blur();
+      }
+    }
+
+    if (event.cancelable) event.preventDefault();
+
+    const now = performance.now();
+    const dt = now - drag.lastTime;
+    if (dt > 0) {
+      const instantV = (clientY - drag.lastY) / dt;
+      drag.velocity = drag.velocity * 0.4 + instantV * 0.6;
+    }
+    drag.lastY = clientY;
+    drag.lastTime = now;
+    drag.dy = dy;
+
+    if (dy >= 0) {
+      drag.panel.style.transform = `translateY(${dy}px)`;
+      const h = Math.max(180, drag.panel.offsetHeight || 360);
+      const progress = Math.min(1, dy / h);
+      drag.overlay.style.setProperty('background-color', `rgba(0, 0, 0, ${(drag.baseAlpha * (1 - progress)).toFixed(3)})`, 'important');
+    } else {
+      // Kéo lên: đàn hồi mượt (rubber-band), giới hạn tối đa ~24px
+      const stretch = -Math.min(24, Math.pow(Math.abs(dy), 0.72) * 1.35);
+      drag.panel.style.transform = `translateY(${stretch.toFixed(1)}px)`;
+      drag.overlay.style.setProperty('background-color', `rgba(0, 0, 0, ${drag.baseAlpha})`, 'important');
+    }
+  }
+
+  function finishDrag(cancelled) {
+    if (!drag) return;
+    const current = drag;
+    drag = null;
+
+    if (!current.locked) {
+      // Chạm nhẹ trực tiếp vào thanh Grabber mà không kéo -> đóng nhanh
+      if (!cancelled && current.onGrabber && !current.aborted) {
+        current.closer();
+      }
+      return;
+    }
+
+    document.documentElement.classList.remove('ft-modal-dragging');
+    const panelHeight = Math.max(180, current.panel.offsetHeight || 320);
+    const threshold = Math.min(120, panelHeight * 0.28);
+    const shouldDismiss = !cancelled && (current.dy > threshold || (current.dy > 36 && current.velocity > 0.45));
+
+    if (shouldDismiss) {
+      current.overlay.dataset.ftClosing = '1';
+      current.panel.style.transition = 'transform 0.2s cubic-bezier(0.22, 1, 0.36, 1)';
+      current.panel.style.transform = 'translateY(100%)';
+      current.overlay.style.transition = 'background-color 0.18s ease-out';
+      current.overlay.style.setProperty('background-color', 'rgba(0, 0, 0, 0)', 'important');
+      setTimeout(() => {
+        current.overlay.dataset.ftDraggedOut = '1';
+        current.closer();
+        window.__foodTrackRepaint?.();
+      }, 200);
+    } else {
+      current.panel.style.transition = 'transform 0.26s cubic-bezier(0.22, 1, 0.36, 1)';
+      current.panel.style.transform = 'translateY(0px)';
+      current.overlay.style.transition = 'background-color 0.22s ease-out';
+      current.overlay.style.setProperty('background-color', `rgba(0, 0, 0, ${current.baseAlpha})`, 'important');
+      setTimeout(() => {
+        if (!current.overlay.dataset.ftClosing) {
+          resetSheetDragStyles(current.overlay);
+        }
+      }, 270);
+    }
+  }
+
+  document.addEventListener('touchstart', (event) => {
+    if (event.touches.length !== 1) {
+      if (drag && !drag.locked) drag = null;
+      return;
+    }
+    const touch = event.touches[0];
+    startDrag(touch.clientX, touch.clientY, event.target, false);
+  }, { passive: true });
+
+  document.addEventListener('touchmove', (event) => {
+    if (!drag || event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    moveDrag(touch.clientX, touch.clientY, event);
+  }, { passive: false });
+
+  document.addEventListener('touchend', () => finishDrag(false), { passive: true });
+  document.addEventListener('touchcancel', () => finishDrag(true), { passive: true });
+
+  // Hỗ trợ kéo thanh Grabber bằng chuột khi test trên trình duyệt
+  document.addEventListener('mousedown', (event) => {
+    if (event.button !== 0) return;
+    startDrag(event.clientX, event.clientY, event.target, true);
+  });
+  document.addEventListener('mousemove', (event) => {
+    if (!drag) return;
+    moveDrag(event.clientX, event.clientY, event);
+  });
+  document.addEventListener('mouseup', () => finishDrag(false));
+})();
 setTimeout(() => {
   setInitialDisplay();
 }, 100);

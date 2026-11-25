@@ -5,7 +5,6 @@
 - **Node.js** (đã dùng `node scripts/build-webview.js`; `npx`/`bunx` đều được — repo không có `bun.lock` nên dùng `npx`).
 - **Android Studio** + SDK cho build Android local; **Xcode** cho iOS (macOS).
 - Tài khoản **EAS** (Expo Application Services) cho build cloud — `eas.json` đã config, `extra.eas.projectId` có sẵn trong `app.json`.
-- File `.env` ở root với 3 biến `EXPO_PUBLIC_GOOGLE_*_CLIENT_ID` (xem [06](06-google-drive-sync.md)). **Lưu ý:** repo không có `.env.example` — tự tạo từ tên biến trên.
 
 ## 7.2. Cài đặt & chạy dev
 
@@ -64,8 +63,8 @@ WebView là **offline single-file**: không fetch runtime, không module loader.
 
 ```
 webview/
-├── templates/     12 partial HTML, ghép theo đúng thứ tự bên dưới
-├── modules/       10 file JS (concat vào 1 IIFE <script> trước </body>)
+├── templates/     10 partial HTML, ghép theo đúng thứ tự bên dưới
+├── modules/       9 file JS (concat vào 1 IIFE <script> trước </body>)
 ├── css/custom.css CSS bổ sung (style block riêng)
 ├── generated.css  Tailwind đã build (minified, commit sẵn)
 └── input.css      @tailwind directives
@@ -73,10 +72,10 @@ webview/
 
 Thứ tự template trong `scripts/build-webview.js` (dòng 42–55) — **sai thứ tự = vỡ layout**:
 
-`base → auth → header → dashboard → sales → menu → stats → history → settings → footer(nav+home indicator) → modals → toast`
+`base → header → dashboard → sales → menu → stats → history → footer(nav+home indicator) → modals → toast`
 
 Build script còn:
-- Inject `<main class="flex-1 overflow-y-auto hide-scrollbar relative">` trước VIEW 1 và `</main>` sau `</section>` của settings (trước footer).
+- Inject `<main class="flex-1 overflow-y-auto hide-scrollbar relative">` trước VIEW 1 và `</main>` sau `</section>` của history (trước footer).
 - Inject 3 `<style>`: font-faces (Be Vietnam Pro 400–900 + Material Symbols, **base64 nhúng từ node_modules**), `generated.css`, `custom.css`.
 - Append `<script>(function(){ ...modules... })();</script></body></html>`.
 - Ghi `assets/foodtrack/index.html`.

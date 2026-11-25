@@ -1,6 +1,6 @@
 // --- sales.js ---
 // Sales view & cart logic
-function renderSalesProducts() {
+function renderSalesProducts(popProductId) {
   const grid = document.getElementById('sales-product-grid');
   if (!grid) return;
   grid.replaceChildren();
@@ -18,13 +18,14 @@ function renderSalesProducts() {
   }
   products.forEach((product) => {
     const card = document.createElement('div');
-    card.className = 'bg-white rounded-2xl border border-neutral-200/80 p-2 flex flex-col justify-between shadow-sm relative overflow-hidden transition-all hover:border-neutral-300 cursor-pointer active:scale-[0.97] active:border-primary/50';
-    const image = product.image_uri ? `<img src="${escapeHtml(product.image_uri)}" alt="${escapeHtml(product.name)}" class="w-full h-24 rounded-xl object-cover">` : '<div class="w-full h-24 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-400"><span class="material-symbols-outlined text-3xl">restaurant</span></div>';
+    card.className = 'bg-white rounded-2xl border border-neutral-200/80 p-2 flex flex-col justify-between shadow-sm relative overflow-hidden transition-transform duration-150 hover:border-neutral-300 cursor-pointer active:scale-[0.97] active:border-primary/50';
+    const image = product.image_uri ? `<img src="${escapeHtml(product.image_uri)}" alt="${escapeHtml(product.name)}" class="w-full aspect-square rounded-xl object-cover">` : '<div class="w-full aspect-square rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-400"><span class="material-symbols-outlined text-3xl">restaurant</span></div>';
     const quantity = state.cart[product.id] || 0;
+    const popClass = popProductId && popProductId === product.id ? ' ft-pop' : '';
     const action = quantity > 0
-      ? `<div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200"><button data-step="-1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold" aria-label="Giảm ${escapeHtml(product.name)}">−</button><span class="w-6 text-center font-bold text-neutral-900 text-xs">${quantity}</span><button data-step="1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold" aria-label="Tăng ${escapeHtml(product.name)}">+</button></div>`
-      : `<button class="w-7 h-7 rounded-lg bg-neutral-900 text-white hover:bg-primary active:scale-90 flex items-center justify-center transition-all shadow-sm" aria-label="Thêm ${escapeHtml(product.name)}"><span class="material-symbols-outlined text-[16px]">add</span></button>`;
-    card.innerHTML = `<div><div class="w-full h-24 rounded-xl bg-neutral-100 overflow-hidden relative">${image}${quantity ? `<span class="absolute top-1.5 right-1.5 bg-primary text-white text-[11px] px-2 py-0.5 rounded-full font-bold">${quantity}</span>` : ''}</div><h4 class="text-xs font-bold text-neutral-900 mt-1.5 line-clamp-1">${escapeHtml(product.name)}</h4><p class="text-[10px] text-neutral-400 line-clamp-1 mt-0.5">${escapeHtml(product.description || '')}</p></div><div class="mt-2 pt-1.5 border-t border-neutral-100 flex items-center justify-between"><span class="text-xs font-extrabold text-primary">${formatMoney(product.price_vnd)} đ</span>${action}</div>`;
+      ? `<div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200"><button data-step="-1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform" aria-label="Giảm ${escapeHtml(product.name)}">−</button><span class="w-6 text-center font-bold text-neutral-900 text-xs tabular-nums${popClass}">${quantity}</span><button data-step="1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform" aria-label="Tăng ${escapeHtml(product.name)}">+</button></div>`
+      : `<button class="w-7 h-7 rounded-lg bg-neutral-900 text-white hover:bg-primary active:scale-90 flex items-center justify-center transition-transform shadow-sm" aria-label="Thêm ${escapeHtml(product.name)}"><span class="material-symbols-outlined text-[16px]">add</span></button>`;
+    card.innerHTML = `<div><div class="w-full aspect-square rounded-xl bg-neutral-100 overflow-hidden relative">${image}${quantity ? `<span class="absolute top-1.5 right-1.5 bg-primary text-white text-[11px] px-2 py-0.5 rounded-full font-bold tabular-nums${popClass}">${quantity}</span>` : ''}</div><h4 class="text-xs font-bold text-neutral-900 mt-1.5 line-clamp-1">${escapeHtml(product.name)}</h4><p class="text-[10px] text-neutral-400 line-clamp-1 mt-0.5">${escapeHtml(product.description || '')}</p></div><div class="mt-2 pt-1.5 border-t border-neutral-100 flex items-center justify-between"><span class="text-xs font-extrabold text-primary">${formatMoney(product.price_vnd)} đ</span>${action}</div>`;
     card.addEventListener('click', () => addToCart(product.id));
     card.querySelectorAll('[data-step]').forEach((button) => {
       button.addEventListener('click', (event) => {
@@ -51,20 +52,22 @@ function clearSalesSearch() {
   renderSalesProducts();
 }
 
+let _lastCartCount = 0;
+
 function addToCart(id) {
   const product = state.products.find((item) => item.id === id);
   if (!product || !product.active) return;
   state.cart[id] = (state.cart[id] || 0) + 1;
-  renderCartUI();
-  renderSalesProducts();
+  renderCartUI(true);
+  renderSalesProducts(id);
 }
 
 function updateCartQuantity(id, delta) {
   if (!state.cart[id]) return;
   state.cart[id] += delta;
   if (state.cart[id] <= 0) delete state.cart[id];
-  renderCartUI();
-  renderSalesProducts();
+  renderCartUI(true);
+  renderSalesProducts(id);
 }
 
 function cartTotals() {
@@ -104,8 +107,11 @@ function updateOrderButtonsState() {
   }
 }
 
-function renderCartUI() {
+function renderCartUI(fromInteraction) {
   const totals = cartTotals();
+  const prevCount = _lastCartCount;
+  _lastCartCount = totals.count;
+  const dockBadge = document.getElementById('dock-cart-badge');
   setText('dock-cart-badge', String(totals.count));
   setText('dock-cart-count-label', `Chi tiết đơn (${totals.count} món)`);
   setText('dock-cart-total-text', `${formatMoney(totals.amount)} đ`);
@@ -114,8 +120,18 @@ function renderCartUI() {
     navBadge.textContent = String(totals.count);
     navBadge.classList.toggle('hidden', totals.count === 0);
   }
-  document.getElementById('btn-quick-clear-cart')?.classList.toggle('hidden', totals.count === 0);
+  if (fromInteraction && totals.count > 0 && totals.count !== prevCount) {
+    triggerPop(dockBadge);
+    triggerPop(navBadge);
+  }
+  const clearTab = document.getElementById('btn-quick-clear-cart');
+  if (clearTab) {
+    clearTab.classList.toggle('ft-clear-tab-visible', totals.count > 0);
+  }
   updateOrderButtonsState();
+  if (fromInteraction && prevCount === 0 && totals.count > 0) {
+    triggerPop(document.getElementById('btn-dock-create-order'));
+  }
   setText('sheet-cart-badge', `${totals.count} món`);
   setText('sheet-total-price', `${formatMoney(totals.amount)} đ`);
   const methodLabel = document.getElementById('dock-cart-method-label');
@@ -133,7 +149,7 @@ function renderCartUI() {
     if (!product) return;
     const row = document.createElement('div');
     row.className = 'flex items-center justify-between text-xs py-2';
-    row.innerHTML = `<div class="flex-1 pr-2"><p class="font-bold text-neutral-800 line-clamp-1">${escapeHtml(product.name)}</p><span class="text-[11px] text-neutral-400">${formatMoney(product.price_vnd)} đ</span></div><div class="flex items-center gap-2.5"><div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200"><button class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold">−</button><span class="w-6 text-center font-bold text-neutral-900 text-xs">${quantity}</span><button class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold">+</button></div><span class="font-extrabold text-neutral-900 w-16 text-right">${formatMoney(product.price_vnd * quantity)} đ</span></div>`;
+    row.innerHTML = `<div class="flex-1 pr-2"><p class="font-bold text-neutral-800 line-clamp-1">${escapeHtml(product.name)}</p><span class="text-[11px] text-neutral-400">${formatMoney(product.price_vnd)} đ</span></div><div class="flex items-center gap-2.5"><div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200"><button class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform">−</button><span class="w-6 text-center font-bold text-neutral-900 text-xs tabular-nums">${quantity}</span><button class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform">+</button></div><span class="font-extrabold text-neutral-900 w-16 text-right tabular-nums">${formatMoney(product.price_vnd * quantity)} đ</span></div>`;
     const buttons = row.querySelectorAll('button');
     buttons[0].addEventListener('click', () => updateCartQuantity(id, -1));
     buttons[1].addEventListener('click', () => updateCartQuantity(id, 1));
@@ -141,8 +157,11 @@ function renderCartUI() {
   });
 }
 
-function openCartSheet() { document.getElementById('sales-cart-sheet')?.classList.remove('hidden'); }
-function closeCartSheet() { document.getElementById('sales-cart-sheet')?.classList.add('hidden'); }
+function openCartSheet() {
+  document.getElementById('sales-cart-sheet')?.classList.remove('hidden');
+  requestAnimationFrame(() => positionSlidingPill('sheet-pay-pill', `sheet-pay-${state.paymentMethod}`));
+}
+function closeCartSheet() { hideOverlay(document.getElementById('sales-cart-sheet')); }
 
 function clearCart() {
   state.cart = Object.create(null);
@@ -156,9 +175,10 @@ function setPaymentMethod(method) {
   ['cash', 'transfer'].forEach((value) => {
     const button = document.getElementById(`sheet-pay-${value}`);
     if (button) button.className = value === state.paymentMethod
-      ? 'px-2.5 py-1 text-xs font-semibold rounded-md bg-white text-neutral-900 shadow-sm transition-all'
-      : 'px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-600 hover:text-neutral-900 transition-all';
+      ? 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-900 transition-colors'
+      : 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-600 hover:text-neutral-900 transition-colors';
   });
+  positionSlidingPill('sheet-pay-pill', `sheet-pay-${state.paymentMethod}`);
   renderCartUI();
 }
 

@@ -1,5 +1,5 @@
 import { Asset } from 'expo-asset';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Pressable, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -21,7 +21,6 @@ type BridgeResponse =
 const MAX_MESSAGE_LENGTH = 8_000_000;
 
 export function FoodTrackWebView() {
-  const router = useRouter();
   const webView = useRef<WebView<{}>>(null);
   const writeQueue = useRef<Promise<void>>(Promise.resolve());
   const pendingRequests = useRef(new Set<string>());
@@ -38,13 +37,13 @@ export function FoodTrackWebView() {
     let active = true;
     const asset = Asset.fromModule(require('../assets/foodtrack/index.html'));
     void asset.downloadAsync().then(() => {
-      if (!asset.localUri) throw new Error('Không tìm thấy giao diện FoodTrack đã đóng gói.');
+      if (!asset.localUri) throw new Error('Không tìm thấy giao diện HaFood đã đóng gói.');
       if (active) {
         setLoadError(null);
         setHtmlUri(asset.localUri);
       }
     }).catch((error: unknown) => {
-      if (active) setLoadError(error instanceof Error ? error.message : 'Không thể mở giao diện FoodTrack.');
+      if (active) setLoadError(error instanceof Error ? error.message : 'Không thể mở giao diện HaFood.');
     });
     return () => { active = false; };
   }, [retry]);
@@ -111,11 +110,6 @@ export function FoodTrackWebView() {
       const waitTime = Date.now() - receiveTime;
       const t0 = Date.now();
       try {
-        if (request?.method === 'settings.openNative') {
-          respond({ id: request.id, status: 'success', data: { opened: true } });
-          setTimeout(() => router.push('/settings'), 50);
-          return;
-        }
         if (!request || !isNativeBridgeMethod(request.method)) {
           throw new Error('Yêu cầu không nằm trong danh sách bridge được phép.');
         }
@@ -143,14 +137,14 @@ export function FoodTrackWebView() {
     } else {
       await processRequest();
     }
-  }, [respond, router]);
+  }, [respond]);
 
   if (!htmlUri || loadError) {
     return (
       <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, backgroundColor: colors.canvas }}>
         {loadError ? (
           <>
-            <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700', textAlign: 'center' }}>Không mở được giao diện FoodTrack</Text>
+            <Text style={{ color: colors.text, fontSize: 16, fontWeight: '700', textAlign: 'center' }}>Không mở được giao diện HaFood</Text>
             <Text style={{ color: colors.faint, marginTop: 8, textAlign: 'center' }}>{loadError}</Text>
             <Pressable onPress={() => { setHtmlUri(null); setLoadError(null); setRetry((current) => current + 1); }} style={{ marginTop: 20, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12, backgroundColor: colors.primary }}>
               <Text style={{ color: '#fff', fontWeight: '700' }}>Thử lại</Text>
@@ -170,7 +164,7 @@ export function FoodTrackWebView() {
         originWhitelist={['file://*', 'about:blank']}
         onShouldStartLoadWithRequest={(request) => request.url.startsWith('file://') || request.url === 'about:blank'}
         onMessage={(event) => { void handleMessage(event); }}
-        onError={(event) => setLoadError(event.nativeEvent.description || 'Không thể tải giao diện FoodTrack.')}
+        onError={(event) => setLoadError(event.nativeEvent.description || 'Không thể tải giao diện HaFood.')}
         javaScriptEnabled
         domStorageEnabled
         cacheEnabled={false}

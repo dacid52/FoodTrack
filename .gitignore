@@ -43,3 +43,13 @@ yarn-error.*
 
 # build outputs
 /release-apk/
+*.apk
+*.aab
+*.ipa
+
+# local preview / scratch / OS / secrets
+webview-test/
+scripts/build-webview-test.js
+client_secret*.json
+*.log
+Thumbs.db

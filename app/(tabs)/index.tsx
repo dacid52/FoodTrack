@@ -76,7 +76,7 @@ export default function DashboardScreen() {
 
   return (
     <Page title="Tổng quan" right={<HeaderActions />}>
-      <Pressable onPress={() => router.push('/settings')} style={styles.offlineBanner}>
+      <Pressable style={styles.offlineBanner}>
         <Text style={styles.offlineDot}>●</Text>
         <View style={{ flex: 1 }}>
           <Text style={styles.offlineTitle}>Dữ liệu lưu trên thiết bị</Text>
@@ -88,7 +88,7 @@ export default function DashboardScreen() {
       <View style={common.row}>
         <View style={{ flex: 1 }}>
           <Text style={common.muted}>Hôm nay, {localDate().split('-').reverse().join('/')}</Text>
-          <Text style={styles.shopName}>Quán Ăn Vặt FoodTrack</Text>
+          <Text style={styles.shopName}>Quán Ăn Vặt HaFood</Text>
         </View>
         <Button label="Bán ngay" compact onPress={() => router.push('/(tabs)/sales')} />
       </View>
