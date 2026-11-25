@@ -8,47 +8,47 @@
     </div>
 
     <!-- Tab items grid -->
-    <div class="relative z-10 grid grid-cols-5 items-center h-[76px] px-3 pointer-events-auto">
+    <div class="relative z-10 grid grid-cols-5 items-center h-[76px] px-1.5 sm:px-3 max-w-2xl mx-auto w-full pointer-events-auto">
       <!-- Tab 1: Tổng quan -->
-      <div class="flex items-center justify-center pt-1">
-        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 text-primary" id="nav-btn-dashboard" onclick="switchTab('dashboard')">
+      <div class="flex items-center justify-center pt-1 min-w-0">
+        <button class="flex flex-col items-center justify-center w-full py-1 transition-all duration-200 text-primary" id="nav-btn-dashboard" onclick="switchTab('dashboard')">
           <span class="material-symbols-outlined text-[22px] nav-icon" style="font-variation-settings: 'FILL' 1, 'wght' 600;">space_dashboard</span>
-          <span class="nav-label text-[11px] font-bold mt-0.5 tracking-tight">Tổng quan</span>
+          <span class="nav-label text-[10px] sm:text-[11px] font-bold mt-0.5 tracking-tight whitespace-nowrap">Tổng quan</span>
         </button>
       </div>
 
       <!-- Tab 2: Menu -->
-      <div class="flex items-center justify-center pt-1">
-        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 text-neutral-500" id="nav-btn-menu" onclick="switchTab('menu')">
+      <div class="flex items-center justify-center pt-1 min-w-0">
+        <button class="flex flex-col items-center justify-center w-full py-1 transition-all duration-200 text-neutral-500" id="nav-btn-menu" onclick="switchTab('menu')">
           <span class="material-symbols-outlined text-[22px] nav-icon" style="font-variation-settings: 'FILL' 0, 'wght' 500;">restaurant_menu</span>
-          <span class="nav-label text-[11px] font-medium mt-0.5 tracking-tight">Menu</span>
+          <span class="nav-label text-[10px] sm:text-[11px] font-medium mt-0.5 tracking-tight whitespace-nowrap">Menu</span>
         </button>
       </div>
 
       <!-- Tab 3: Bán hàng - center elevated -->
-      <div class="flex items-center justify-center pt-1 z-20">
-        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 active:scale-95" id="nav-btn-sales" onclick="switchTab('sales')">
+      <div class="flex items-center justify-center pt-1 z-20 min-w-0">
+        <button class="flex flex-col items-center justify-center w-full py-1 transition-all duration-200 active:scale-95" id="nav-btn-sales" onclick="switchTab('sales')">
           <span class="relative -mt-3.5 w-12 h-12 rounded-full bg-neutral-900 shadow-md ring-2 ring-white/80 flex items-center justify-center transition-colors" id="nav-sales-fab">
             <span class="material-symbols-outlined text-[24px] text-white" style="font-variation-settings: 'FILL' 1, 'wght' 500;">point_of_sale</span>
-            <span class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold ring-2 ring-white" id="nav-cart-indicator">0</span>
+            <span class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold ring-2 ring-white tabular-nums" id="nav-cart-indicator">0</span>
           </span>
-          <span class="nav-label text-[11px] font-medium text-neutral-600 mt-1 tracking-tight" id="nav-label-sales">Tạo đơn</span>
+          <span class="nav-label text-[10px] sm:text-[11px] font-medium text-neutral-600 mt-1 tracking-tight whitespace-nowrap" id="nav-label-sales">Tạo đơn</span>
         </button>
       </div>
 
       <!-- Tab 4: Thống kê -->
-      <div class="flex items-center justify-center pt-1">
-        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-all duration-200 text-neutral-500" id="nav-btn-stats" onclick="switchTab('stats')">
+      <div class="flex items-center justify-center pt-1 min-w-0">
+        <button class="flex flex-col items-center justify-center w-full py-1 transition-all duration-200 text-neutral-500" id="nav-btn-stats" onclick="switchTab('stats')">
           <span class="material-symbols-outlined text-[22px] nav-icon" style="font-variation-settings: 'FILL' 0, 'wght' 500;">monitoring</span>
-          <span class="nav-label text-[11px] font-medium mt-0.5 tracking-tight">Thống kê</span>
+          <span class="nav-label text-[10px] sm:text-[11px] font-medium mt-0.5 tracking-tight whitespace-nowrap">Thống kê</span>
         </button>
       </div>
 
       <!-- Tab 5: Lịch sử -->
-      <div class="flex items-center justify-center pt-1">
-        <button class="flex flex-col items-center justify-center min-w-[52px] py-1 transition-colors duration-200 text-neutral-500" id="nav-btn-history" onclick="switchTab('history')">
+      <div class="flex items-center justify-center pt-1 min-w-0">
+        <button class="flex flex-col items-center justify-center w-full py-1 transition-colors duration-200 text-neutral-500" id="nav-btn-history" onclick="switchTab('history')">
           <span class="material-symbols-outlined text-[22px] nav-icon" style="font-variation-settings: 'FILL' 0, 'wght' 500;">history</span>
-          <span class="nav-label text-[11px] font-medium mt-0.5 tracking-tight">Lịch sử</span>
+          <span class="nav-label text-[10px] sm:text-[11px] font-medium mt-0.5 tracking-tight whitespace-nowrap">Lịch sử</span>
         </button>
       </div>
     </div>

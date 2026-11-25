@@ -10,9 +10,6 @@ export function HeaderActions() {
       <Pressable accessibilityLabel="Lịch sử giao dịch" onPress={() => router.push('/(tabs)/history')} style={styles.action}>
         <Text style={styles.icon}>◷</Text>
       </Pressable>
-      <Pressable accessibilityLabel="Cài đặt và đồng bộ" onPress={() => router.push('/settings')} style={styles.action}>
-        <Text style={styles.icon}>☁</Text>
-      </Pressable>
     </View>
   );
 }

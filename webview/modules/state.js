@@ -27,6 +27,7 @@ const state = {
   historySearchQuery: '',
   currentTx: null,
   editingOrder: null,
+  editingExpense: null,
   pendingDeleteProductId: null,
   pending: new Map(),
   nextRequestId: 0,
@@ -257,10 +258,22 @@ function runWrite(method, payload) {
   return state.writeQueue;
 }
 
-function showToast(message, isError) {
+function showToast(message, variant) {
   const container = document.getElementById('toast-container');
   if (!container) return;
-  container.innerHTML = `<div class="toast-animate ${isError ? 'bg-red-700' : 'bg-neutral-900/95'} text-white px-3.5 py-2 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-semibold border border-white/10"><span class="material-symbols-outlined text-[18px]">${isError ? 'error' : 'check_circle'}</span><span>${escapeHtml(message)}</span></div>`;
+  const kind = variant === true || variant === 'error' ? 'error' : variant === 'info' ? 'info' : 'success';
+  const boxCls = kind === 'error'
+    ? 'bg-red-50/95 border-red-200 text-red-800'
+    : kind === 'info'
+      ? 'bg-white/95 border-orange-200/80 text-neutral-800'
+      : 'bg-white/95 border-emerald-200/90 text-neutral-800';
+  const iconWrapCls = kind === 'error'
+    ? 'bg-red-100 text-red-500'
+    : kind === 'info'
+      ? 'bg-orange-50 text-primary'
+      : 'bg-emerald-50 text-emerald-600';
+  const iconName = kind === 'error' ? 'error' : kind === 'info' ? 'info' : 'check_circle';
+  container.innerHTML = `<div class="toast-animate backdrop-blur-md ${boxCls} pl-2 pr-3.5 py-2 rounded-full shadow-lg flex items-center gap-2 text-xs font-semibold border"><span class="w-6 h-6 rounded-full ${iconWrapCls} flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[15px]">${iconName}</span></span><span>${escapeHtml(message)}</span></div>`;
   clearTimeout(container._toastTimer);
   container._toastTimer = setTimeout(() => { container.innerHTML = ''; window.__foodTrackRepaint?.(); }, 2600);
 }
@@ -285,11 +298,31 @@ function resetSheetDragStyles(el, clearSettled) {
   }
 }
 
+// Mở overlay/sheet an toàn: hủy timer đóng cũ nếu bấm mở nhanh liên tiếp
+function showOverlay(el) {
+  if (!el) return;
+  if (el._ftHideTimer) {
+    clearTimeout(el._ftHideTimer);
+    el._ftHideTimer = null;
+  }
+  delete el.dataset.ftClosing;
+  delete el.dataset.ftDraggedOut;
+  el.classList.remove('ft-overlay-out', 'ft-sheet-settled', 'hidden');
+  resetSheetDragStyles(el, true);
+}
+
 // Exit animation cho overlay/sheet: giữ element thêm ~190ms để panel trượt
 // xuống + backdrop mờ dần rồi mới gắn 'hidden'. Nếu đóng bằng thao tác kéo
 // xuống (ftDraggedOut), ẩn ngay sau khi animation kéo kết thúc.
 function hideOverlay(el) {
   if (!el) return;
+  if (document.activeElement instanceof HTMLElement && el.contains(document.activeElement)) {
+    document.activeElement.blur();
+  }
+  if (el._ftHideTimer) {
+    clearTimeout(el._ftHideTimer);
+    el._ftHideTimer = null;
+  }
   if (el.dataset.ftDraggedOut) {
     delete el.dataset.ftDraggedOut;
     delete el.dataset.ftClosing;
@@ -302,7 +335,8 @@ function hideOverlay(el) {
   el.dataset.ftClosing = '1';
   resetSheetDragStyles(el, false);
   el.classList.add('ft-overlay-out');
-  setTimeout(() => {
+  el._ftHideTimer = setTimeout(() => {
+    el._ftHideTimer = null;
     el.classList.add('hidden');
     el.classList.remove('ft-overlay-out');
     el.classList.remove('ft-sheet-settled');
@@ -313,8 +347,11 @@ function hideOverlay(el) {
 function setBusy(busy) {
   state.busy = busy;
   if (typeof updateOrderButtonsState === 'function') updateOrderButtonsState();
-  const deleteButton = document.getElementById('delete-product-confirm-button');
-  if (deleteButton) deleteButton.disabled = busy;
+  ['delete-product-confirm-button', 'btn-save-expense', 'edit-order-save-btn', 'btn-save-menu', 'btn-confirm-delete-order']
+    .forEach((id) => {
+      const btn = document.getElementById(id);
+      if (btn) btn.disabled = busy;
+    });
 }
 
 function clearSampleContent() {

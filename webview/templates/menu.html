@@ -1,5 +1,5 @@
 <!-- ================= VIEW 3: MENU QUÁN (QUẢN LÝ MÓN - KHÔNG DANH MỤC) ================= -->
-    <section class="p-3.5 space-y-3 pb-24 hidden" id="view-menu">
+    <section class="p-3.5 space-y-3 pb-6 hidden max-w-2xl mx-auto w-full" id="view-menu">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <h2 class="text-base font-bold text-neutral-900">Menu</h2>
@@ -12,7 +12,7 @@
       </div>
       <div class="relative">
         <span class="material-symbols-outlined text-neutral-400 absolute left-3 top-2.5 text-[18px]">search</span>
-        <input class="w-full bg-white pl-9 pr-4 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder-neutral-400" id="menu-search-input" oninput="filterMenuItems()" type="text">
+        <input class="w-full bg-white pl-9 pr-4 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder-neutral-400" id="menu-search-input" oninput="filterMenuItems()" placeholder="Tìm món trong thực đơn..." type="text">
       </div>
       <div class="flex gap-1.5 text-xs font-medium">
         <button class="px-3 py-1 rounded-lg bg-neutral-900 text-white transition-colors font-semibold" id="menu-filter-all" onclick="setMenuStatusFilter('all')">Tất cả</button>

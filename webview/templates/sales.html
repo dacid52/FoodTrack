@@ -1,16 +1,16 @@
 <!-- ================= VIEW 2: BÁN HÀNG (POS TỐI GIẢN - KHÔNG DANH MỤC) ================= -->
     <section class="flex-col h-full relative hidden overflow-hidden" id="view-sales">
       <div class="p-3 pb-2.5 shrink-0 bg-[#fbfbf9] border-b border-neutral-100">
-        <div class="relative flex items-center w-full">
+        <div class="relative flex items-center w-full max-w-4xl mx-auto">
           <span class="material-symbols-outlined text-neutral-400 absolute left-3 text-[19px] pointer-events-none">search</span>
-          <input class="w-full h-9 pl-9 pr-8 bg-neutral-100 border border-neutral-200/80 rounded-xl text-xs focus:outline-none focus:border-primary text-neutral-900 placeholder:text-neutral-400 transition-colors" id="sales-search-input" oninput="filterSalesProducts()" type="text">
+          <input class="w-full h-9 pl-9 pr-8 bg-neutral-100 border border-neutral-200/80 rounded-xl text-xs focus:outline-none focus:border-primary text-neutral-900 placeholder:text-neutral-400 transition-colors" id="sales-search-input" oninput="filterSalesProducts()" placeholder="Tìm món ăn..." type="text">
           <button class="hidden absolute right-2.5 text-neutral-400 hover:text-neutral-900" id="sales-search-clear" onclick="clearSalesSearch()">
             <span class="material-symbols-outlined text-[17px]">close</span>
           </button>
         </div>
       </div>
       <div class="flex-1 overflow-y-auto px-3.5 pt-2 pb-28 hide-scrollbar">
-        <div class="grid grid-cols-2 gap-2.5" id="sales-product-grid"><div class="bg-white rounded-2xl border border-neutral-200/80 p-2 flex flex-col justify-between shadow-sm relative overflow-hidden transition-all hover:border-neutral-300">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 max-w-4xl mx-auto" id="sales-product-grid"><div class="bg-white rounded-2xl border border-neutral-200/80 p-2 flex flex-col justify-between shadow-sm relative overflow-hidden transition-all hover:border-neutral-300">
         <div>
           <div class="w-full aspect-square rounded-xl bg-neutral-100 overflow-hidden relative">
             <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" alt="Gà rán giòn rụm" class="w-full h-full object-cover">
@@ -166,24 +166,24 @@
             <span>Xóa tất cả</span>
           </span>
         </button>
-        <div class="flex items-center justify-between gap-3">
-          <button class="flex items-center gap-2.5 text-left group p-1 -ml-1 rounded-lg hover:bg-neutral-100 active:scale-95 transition-all" onclick="openCartSheet()">
+        <div class="flex items-center justify-between gap-2.5 max-w-2xl mx-auto">
+          <button class="flex-1 min-w-0 flex items-center gap-2.5 text-left group p-1 -ml-1 rounded-lg hover:bg-neutral-100 active:scale-95 transition-all" onclick="openCartSheet()">
             <div class="w-9 h-9 rounded-xl bg-neutral-900 text-white flex items-center justify-center shrink-0 relative">
               <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
-              <span class="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center border-2 border-white" id="dock-cart-badge">0</span>
+              <span class="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center border-2 border-white tabular-nums" id="dock-cart-badge">0</span>
             </div>
-            <div class="flex flex-col min-w-0">
-              <div class="flex items-center gap-1">
-                <span class="text-xs font-bold text-neutral-900 group-hover:text-primary transition-colors" id="dock-cart-count-label">Chi tiết đơn (0 món)</span>
-                <span class="material-symbols-outlined text-neutral-400 group-hover:text-neutral-900 text-[16px]">keyboard_arrow_up</span>
+            <div class="flex flex-col min-w-0 flex-1">
+              <div class="flex items-center gap-1 min-w-0">
+                <span class="text-xs font-bold text-neutral-900 group-hover:text-primary transition-colors truncate" id="dock-cart-count-label">Chi tiết đơn (0 món)</span>
+                <span class="material-symbols-outlined text-neutral-400 group-hover:text-neutral-900 text-[16px] shrink-0">keyboard_arrow_up</span>
               </div>
-              <div class="flex items-baseline gap-1 mt-0.5">
-                <span class="text-[14px] font-extrabold text-neutral-900 tracking-tight leading-none" id="dock-cart-total-text">0 đ</span>
-                <span class="text-[10px] text-neutral-400 font-medium" id="dock-cart-method-label">• Tiền mặt</span>
+              <div class="flex items-baseline gap-1 mt-0.5 min-w-0">
+                <span class="text-[13px] sm:text-[14px] font-extrabold text-neutral-900 tracking-tight leading-none whitespace-nowrap tabular-nums shrink-0" id="dock-cart-total-text">0 đ</span>
+                <span class="text-[10px] text-neutral-400 font-medium truncate" id="dock-cart-method-label">• Tiền mặt</span>
               </div>
             </div>
           </button>
-          <button class="flex-1 max-w-[160px] h-10 bg-neutral-300 text-neutral-500 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm cursor-not-allowed" disabled="" id="btn-dock-create-order" onclick="confirmOrder()">
+          <button class="shrink-0 min-w-[116px] sm:min-w-[136px] px-3.5 h-10 bg-neutral-300 text-neutral-500 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm whitespace-nowrap cursor-not-allowed" disabled="" id="btn-dock-create-order" onclick="confirmOrder()">
             <span>Tạo đơn</span>
             <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
           </button>

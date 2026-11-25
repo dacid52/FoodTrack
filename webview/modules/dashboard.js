@@ -90,7 +90,7 @@ function renderDashboard(animateList) {
     const income = transaction.amount > 0;
     const row = document.createElement('div');
     row.className = 'bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.98] transition-transform';
-    row.innerHTML = `<div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-xl ${income ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'} flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[16px]">${income ? 'arrow_downward' : 'arrow_upward'}</span></div><div><p class="text-xs font-bold text-neutral-900">${escapeHtml(transaction.title)}</p><p class="text-[10px] text-neutral-400 mt-0.5">${escapeHtml(transaction.time)} • ${escapeHtml(transaction.method)}</p></div></div><div class="text-right"><span class="text-xs font-bold ${income ? 'text-emerald-600' : 'text-orange-600'}">${income ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ</span><span class="block text-[9px] text-neutral-400">Chi tiết ›</span></div>`;
+    row.innerHTML = `<div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2"><div class="w-8 h-8 rounded-xl ${income ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'} flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-[16px]">${income ? 'arrow_downward' : 'arrow_upward'}</span></div><div class="min-w-0 flex-1"><p class="text-xs font-bold text-neutral-900 truncate">${escapeHtml(transaction.title)}</p><p class="text-[10px] text-neutral-400 truncate mt-0.5">${escapeHtml(transaction.time)} • ${escapeHtml(transaction.method)}</p></div></div><div class="text-right shrink-0"><span class="text-xs font-bold whitespace-nowrap tabular-nums ${income ? 'text-emerald-600' : 'text-orange-600'}">${income ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ</span><span class="block text-[9px] text-neutral-400">Chi tiết ›</span></div>`;
     row.addEventListener('click', () => void openTxDetailModal(transaction));
     list.appendChild(row);
   });
@@ -111,8 +111,8 @@ async function setDashboardFilter(period) {
   ['today', 'yesterday', '7days', 'month'].forEach((key) => {
     const button = document.getElementById(`dash-filter-${key}`);
     if (button) button.className = key === period
-      ? 'flex-1 relative py-1.5 rounded-lg font-semibold text-neutral-900 text-center transition-colors'
-      : 'flex-1 relative py-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 text-center transition-colors';
+      ? 'flex-1 relative py-1.5 px-1 rounded-lg font-semibold text-neutral-900 text-center whitespace-nowrap transition-colors'
+      : 'flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 text-center whitespace-nowrap transition-colors';
   });
   updateDashFilterPill();
   try {

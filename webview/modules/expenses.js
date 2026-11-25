@@ -1,12 +1,24 @@
 // --- expenses.js ---
 // Expenses and transaction details logic
+function normalizeOccurredAt(raw) {
+  if (typeof raw === 'string') {
+    const cleaned = raw.trim().replace('T', ' ').slice(0, 19);
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(cleaned)) return cleaned;
+    if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(cleaned)) return `${cleaned}:00`;
+  }
+  const now = new Date();
+  return `${localDate(now)} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+}
+
 function openExpenseModal(type) {
+  state.editingExpense = null;
   state.expenseType = type === 'other' ? 'other' : 'import';
+  setText('expense-modal-title', 'Ghi nhận chi phí');
   const amountInput = document.getElementById('exp-amount-input');
   if (amountInput) { amountInput.value = ''; delete amountInput.dataset.raw; }
   ['exp-content-input', 'exp-note-input'].forEach((id) => { const input = document.getElementById(id); if (input) input.value = ''; });
   updateExpenseButtonText();
-  document.getElementById('expense-modal')?.classList.remove('hidden');
+  showOverlay(document.getElementById('expense-modal'));
   setExpenseType(state.expenseType);
   setExpensePayMethod('cash');
   requestAnimationFrame(() => {
@@ -15,7 +27,38 @@ function openExpenseModal(type) {
   });
 }
 
-function closeExpenseModal() { hideOverlay(document.getElementById('expense-modal')); }
+function openEditExpenseModal(tx) {
+  if (!tx || !isSameDayExpense(tx)) return;
+  const exp = tx.detail && tx.detail.expense;
+  state.editingExpense = {
+    id: tx.id,
+    occurredAt: normalizeOccurredAt((exp && exp.occurred_at) || tx.occurred_at),
+  };
+  state.expenseType = tx.type === 'cost_import' ? 'import' : 'other';
+  setText('expense-modal-title', 'Chỉnh sửa chi phí');
+  const amountInput = document.getElementById('exp-amount-input');
+  if (amountInput) {
+    amountInput.value = String(Math.abs(Number((exp && exp.amount_vnd) || tx.amount) || 0));
+    formatExpenseAmountInput();
+  }
+  const contentInput = document.getElementById('exp-content-input');
+  if (contentInput) contentInput.value = (exp && exp.title) || tx.title || '';
+  const noteInput = document.getElementById('exp-note-input');
+  if (noteInput) noteInput.value = (exp && exp.note != null) ? exp.note : (tx.desc || '');
+  updateExpenseButtonText();
+  showOverlay(document.getElementById('expense-modal'));
+  setExpenseType(state.expenseType);
+  setExpensePayMethod((exp && exp.payment_method) || tx.payment_method || tx.method || 'cash');
+  requestAnimationFrame(() => {
+    positionSlidingPill('exp-type-pill', `exp-type-${state.expenseType}`);
+    positionSlidingPill('exp-pay-pill', `exp-pay-${state.expensePayMethod}`);
+  });
+}
+
+function closeExpenseModal() {
+  hideOverlay(document.getElementById('expense-modal'));
+  state.editingExpense = null;
+}
 
 function setExpenseType(type) {
   state.expenseType = type === 'other' ? 'other' : 'import';
@@ -53,38 +96,64 @@ function expenseAmountValue() {
 
 function updateExpenseButtonText() {
   const amount = expenseAmountValue();
-  setText('btn-save-expense-text', amount > 0 ? `Lưu chi phí (${formatMoney(amount)} đ)` : 'Lưu chi phí');
+  const baseLabel = state.editingExpense ? 'Lưu thay đổi' : 'Lưu chi phí';
+  setText('btn-save-expense-text', amount > 0 ? `${baseLabel} (${formatMoney(amount)} đ)` : baseLabel);
 }
 
 async function saveExpenseRecord() {
+  if (state.busy) return;
   const amount = expenseAmountValue();
   const title = document.getElementById('exp-content-input')?.value.trim() || '';
-  const now = new Date();
-  const occurredAt = `${localDate(now)} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
   const note = document.getElementById('exp-note-input')?.value.trim() || '';
   if (!Number.isSafeInteger(amount) || amount <= 0 || !title) {
     showToast('Nhập nội dung và số tiền hợp lệ.', true);
     return;
   }
+  const editing = state.editingExpense;
+  const occurredAt = editing ? editing.occurredAt : normalizeOccurredAt();
   setBusy(true);
   try {
-    await runWrite('expenses.create', {
-      category: state.expenseType === 'import' ? 'purchase' : 'other',
-      amountVnd: amount,
-      title,
-      note,
-      paymentMethod: state.expensePayMethod,
-      occurredAt,
-    });
-    closeExpenseModal();
-    await refreshAll();
-    showToast('Đã lưu chi phí.');
+    if (editing) {
+      await runWrite('expenses.update', {
+        id: editing.id,
+        category: state.expenseType === 'import' ? 'purchase' : 'other',
+        amountVnd: amount,
+        title,
+        note,
+        paymentMethod: state.expensePayMethod,
+        occurredAt,
+      });
+      closeExpenseModal();
+      closeTxDetailModal();
+      await refreshAll();
+      showToast('Đã cập nhật khoản chi.');
+    } else {
+      await runWrite('expenses.create', {
+        category: state.expenseType === 'import' ? 'purchase' : 'other',
+        amountVnd: amount,
+        title,
+        note,
+        paymentMethod: state.expensePayMethod,
+        occurredAt,
+      });
+      closeExpenseModal();
+      await refreshAll();
+      showToast('Đã lưu chi phí.');
+    }
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
 }
 
 function isSameDayOrder(transaction) {
   return Boolean(transaction) && transaction.type === 'order' && transaction.date === localDate();
+}
+
+function isSameDayExpense(transaction) {
+  return Boolean(transaction) && (transaction.type === 'cost_import' || transaction.type === 'cost_other') && transaction.date === localDate();
+}
+
+function isSameDayTransaction(transaction) {
+  return isSameDayOrder(transaction) || isSameDayExpense(transaction);
 }
 
 function renderTxModalItems(items) {
@@ -110,8 +179,21 @@ async function openTxDetailModal(transaction) {
     state.currentTx = { ...transaction, detail };
     const income = transaction.amount > 0;
     const isOrder = transaction.type === 'order';
-    setText('tx-modal-type-badge', income ? 'Đơn hàng thành công' : transaction.type === 'cost_import' ? 'Chi tiền nhập hàng' : 'Chi phí hoạt động');
-    setText('tx-modal-amount', `${income ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ`);
+    const isImport = transaction.type === 'cost_import';
+    const badgeEl = document.getElementById('tx-modal-type-badge');
+    if (badgeEl) {
+      badgeEl.textContent = income ? 'Đơn hàng thành công' : isImport ? 'Chi tiền nhập hàng' : 'Chi phí khác';
+      badgeEl.className = income
+        ? 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800'
+        : isImport
+          ? 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-100 text-orange-800'
+          : 'px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-neutral-200/80 text-neutral-700';
+    }
+    const amtEl = document.getElementById('tx-modal-amount');
+    if (amtEl) {
+      amtEl.textContent = `${income ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ`;
+      amtEl.className = `text-2xl font-extrabold mt-1.5 tabular-nums ${income ? 'text-emerald-600' : 'text-orange-600'}`;
+    }
     setText('tx-modal-title', transaction.title);
     setText('tx-modal-time', formatTime(transaction.occurred_at));
     setText('tx-modal-method', transaction.method);
@@ -124,42 +206,53 @@ async function openTxDetailModal(transaction) {
       setText('tx-modal-desc', detail.items || '—');
     }
     const actions = document.getElementById('tx-modal-actions');
-    const editable = isSameDayOrder(transaction);
+    const editable = isSameDayTransaction(transaction);
+    setText('tx-modal-delete-label', isOrder ? 'Xóa đơn' : 'Xóa chi phí');
     actions?.classList.toggle('hidden', !editable);
     actions?.classList.toggle('flex', editable);
-    document.getElementById('tx-detail-modal')?.classList.remove('hidden');
+    showOverlay(document.getElementById('tx-detail-modal'));
   } catch (error) { reportError(error); }
 }
 
 function closeTxDetailModal() { hideOverlay(document.getElementById('tx-detail-modal')); }
 
-// --- Sửa / xóa đơn hàng trong ngày ---
+// --- Sửa / xóa đơn hàng & khoản chi trong ngày ---
 function promptDeleteOrder() {
-  if (!state.currentTx || !isSameDayOrder(state.currentTx)) return;
-  setText('delete-order-confirm-text', `${state.currentTx.title} sẽ bị xóa khỏi lịch sử và báo cáo.`);
-  document.getElementById('delete-order-confirm-modal')?.classList.remove('hidden');
+  const tx = state.currentTx;
+  if (!tx || !isSameDayTransaction(tx)) return;
+  const isOrder = tx.type === 'order';
+  setText('delete-order-confirm-title', isOrder ? 'Xóa đơn hàng này?' : 'Xóa khoản chi này?');
+  setText('delete-order-confirm-btn-label', isOrder ? 'Xóa đơn' : 'Xóa chi phí');
+  setText('delete-order-confirm-text', `${tx.title} sẽ bị xóa khỏi lịch sử và báo cáo.`);
+  showOverlay(document.getElementById('delete-order-confirm-modal'));
 }
 
 function closeDeleteOrderModal() { hideOverlay(document.getElementById('delete-order-confirm-modal')); }
 
 async function executeDeleteOrder() {
   const tx = state.currentTx;
-  if (!tx || !isSameDayOrder(tx)) return;
+  if (!tx || !isSameDayTransaction(tx) || state.busy) return;
+  const isOrder = tx.type === 'order';
   setBusy(true);
   try {
-    await runWrite('orders.delete', { id: tx.id });
+    await runWrite(isOrder ? 'orders.delete' : 'expenses.delete', { id: tx.id });
     closeDeleteOrderModal();
     closeEditOrderModal();
+    closeExpenseModal();
     closeTxDetailModal();
     await refreshAll();
-    showToast('Đã xóa đơn hàng.');
+    showToast(isOrder ? 'Đã xóa đơn hàng.' : 'Đã xóa khoản chi.');
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
 }
 
 function openEditOrderModal() {
   const tx = state.currentTx;
-  if (!tx || tx.type !== 'order') return;
+  if (!tx || !isSameDayTransaction(tx)) return;
+  if (tx.type !== 'order') {
+    openEditExpenseModal(tx);
+    return;
+  }
   const rawItems = (tx.detail && tx.detail.rawItems) || [];
   state.editingOrder = {
     id: tx.id,
@@ -177,17 +270,25 @@ function openEditOrderModal() {
   const select = document.getElementById('edit-order-product-select');
   if (select) {
     select.replaceChildren();
-    state.products.filter((product) => product.active).forEach((product) => {
+    const activeProducts = state.products.filter((product) => product.active);
+    if (!activeProducts.length) {
       const option = document.createElement('option');
-      option.value = product.id;
-      option.textContent = `${product.name} — ${formatMoney(product.price_vnd)} đ`;
+      option.value = '';
+      option.textContent = 'Không có món đang bán';
       select.appendChild(option);
-    });
+    } else {
+      activeProducts.forEach((product) => {
+        const option = document.createElement('option');
+        option.value = product.id;
+        option.textContent = `${product.name} — ${formatMoney(product.price_vnd)} đ`;
+        select.appendChild(option);
+      });
+    }
   }
   setEditOrderPay(state.editingOrder.paymentMethod === 'transfer' ? 'transfer' : state.editingOrder.paymentMethod === 'debt' ? 'debt' : 'cash');
   setText('edit-order-subtitle', tx.title);
   renderEditOrderItems();
-  document.getElementById('edit-order-modal')?.classList.remove('hidden');
+  showOverlay(document.getElementById('edit-order-modal'));
 }
 
 function closeEditOrderModal() {
@@ -252,7 +353,7 @@ function setEditOrderPay(method) {
 
 async function saveEditOrder() {
   const order = state.editingOrder;
-  if (!order) return;
+  if (!order || state.busy) return;
   if (!order.items.length) {
     showToast('Đơn phải có ít nhất 1 món.', true);
     return;

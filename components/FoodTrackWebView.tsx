@@ -1,7 +1,7 @@
 import { Asset } from 'expo-asset';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text } from 'react-native';
+import { ActivityIndicator, BackHandler, KeyboardAvoidingView, Platform, Pressable, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { type WebViewMessageEvent } from 'react-native-webview';
 
@@ -58,6 +58,18 @@ export function FoodTrackWebView() {
     webView.current?.injectJavaScript('window.FoodTrack && window.FoodTrack.refresh(); true;');
   }, []));
 
+  // Chặn nút Back / vuốt cạnh trên Android để đóng modal, lùi về Tổng quan, hoặc nhấn 2 lần mới thoát app
+  useEffect(() => {
+    if (Platform.OS !== 'android') return;
+    const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!webView.current) return false;
+      webView.current.injectJavaScript('window.__ftHandleHardwareBack && window.__ftHandleHardwareBack(); true;');
+      setRepaintTick((tick) => tick + 1);
+      return true;
+    });
+    return () => subscription.remove();
+  }, []);
+
   const respond = useCallback((response: BridgeResponse) => {
     const serialized = JSON.stringify(response).replace(/[<\u2028\u2029]/g, (character) => {
       if (character === '<') return '\\u003c';
@@ -78,6 +90,10 @@ export function FoodTrackWebView() {
         throw new Error('Yêu cầu từ giao diện không hợp lệ.');
       }
       const candidate = value as Record<string, unknown>;
+      if (candidate.method === 'app.exit') {
+        BackHandler.exitApp();
+        return;
+      }
       if (typeof candidate.id !== 'string' || !/^ft-[a-z0-9-]{1,90}$/.test(candidate.id)) {
         throw new Error('Mã yêu cầu không hợp lệ.');
       }
@@ -157,28 +173,33 @@ export function FoodTrackWebView() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fbfbf9' }} edges={['top', 'left', 'right', 'bottom']}>
-      <WebView<{}>
-        ref={webView}
-        source={{ uri: htmlUri }}
-        style={{ flex: 1, backgroundColor: repaintTick % 2 === 0 ? '#fbfbf9' : '#fbfbfa' }}
-        originWhitelist={['file://*', 'about:blank']}
-        onShouldStartLoadWithRequest={(request) => request.url.startsWith('file://') || request.url === 'about:blank'}
-        onMessage={(event) => { void handleMessage(event); }}
-        onError={(event) => setLoadError(event.nativeEvent.description || 'Không thể tải giao diện HaFood.')}
-        javaScriptEnabled
-        domStorageEnabled
-        cacheEnabled={false}
-        allowFileAccess
-        allowFileAccessFromFileURLs
-        allowingReadAccessToURL={htmlUri}
-        mixedContentMode="never"
-        setSupportMultipleWindows={false}
-        allowsBackForwardNavigationGestures={false}
-        keyboardDisplayRequiresUserAction={false}
-        hideKeyboardAccessoryView
-        androidLayerType="hardware"
-        overScrollMode="never"
-      />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <WebView<{}>
+          ref={webView}
+          source={{ uri: htmlUri }}
+          style={{ flex: 1, backgroundColor: repaintTick % 2 === 0 ? '#fbfbf9' : '#fbfbfa' }}
+          originWhitelist={['file://*', 'about:blank']}
+          onShouldStartLoadWithRequest={(request) => request.url.startsWith('file://') || request.url === 'about:blank'}
+          onMessage={(event) => { void handleMessage(event); }}
+          onError={(event) => setLoadError(event.nativeEvent.description || 'Không thể tải giao diện HaFood.')}
+          javaScriptEnabled
+          domStorageEnabled
+          cacheEnabled={false}
+          allowFileAccess
+          allowFileAccessFromFileURLs
+          allowingReadAccessToURL={htmlUri}
+          mixedContentMode="never"
+          setSupportMultipleWindows={false}
+          allowsBackForwardNavigationGestures={false}
+          keyboardDisplayRequiresUserAction={false}
+          hideKeyboardAccessoryView
+          androidLayerType="hardware"
+          overScrollMode="never"
+        />
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

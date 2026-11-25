@@ -1,5 +1,5 @@
 <!-- ================= VIEW 4: THỐNG KÊ (LỢI NHUẬN LÀ CHỈ SỐ NỔI BẬT NHẤT) ================= -->
-    <section class="p-3.5 space-y-3 pb-24 hidden" id="view-stats">
+    <section class="p-3.5 space-y-3 pb-4 hidden max-w-2xl mx-auto w-full" id="view-stats">
       <!-- Header + Điều hướng kỳ gọn cố định 1 hàng (không đẩy card lên xuống) -->
       <div class="space-y-2.5">
         <div class="flex items-center justify-between gap-2">
@@ -79,18 +79,9 @@
 
       <!-- BIỂU ĐỒ THU – CHI (Trực quan, vuông vức, nhìn là hiểu ngay) -->
       <div class="bg-white rounded-2xl border border-neutral-200/80 shadow-sm p-3.5" id="stats-profit-chart-card">
-        <div class="flex items-start justify-between gap-2 mb-3">
-          <div class="min-w-0">
-            <h3 class="text-xs font-bold text-neutral-900 leading-tight" id="stats-chart-title">Biểu đồ</h3>
-            <p class="text-[11px] text-neutral-400 font-medium truncate mt-0.5" id="stats-chart-subtitle">Tháng 11</p>
-          </div>
-
-          <!-- Chú thích 3 màu cố định ở mọi chế độ (chấm tròn) -->
-          <div class="shrink-0 flex items-center gap-2.5 text-[10px] font-semibold text-neutral-500 pt-0.5" id="stats-chart-legend">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Thu</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-orange-400"></span>Nhập</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-slate-400"></span>Khác</span>
-          </div>
+        <div class="flex items-center justify-between gap-2 mb-2.5">
+          <h3 class="text-xs font-bold text-neutral-900 leading-tight" id="stats-chart-title">Biểu đồ</h3>
+          <span class="text-[11px] text-neutral-400 font-medium truncate tabular-nums" id="stats-chart-subtitle">Tháng 11</span>
         </div>
 
         <!-- Dải số liệu chi tiết của cột đang chọn (chế độ Tuần & Tháng — không hiện số đơn) -->

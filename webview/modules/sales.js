@@ -23,9 +23,10 @@ function renderSalesProducts(popProductId) {
     const quantity = state.cart[product.id] || 0;
     const popClass = popProductId && popProductId === product.id ? ' ft-pop' : '';
     const action = quantity > 0
-      ? `<div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200"><button data-step="-1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform" aria-label="Giảm ${escapeHtml(product.name)}">−</button><span class="w-6 text-center font-bold text-neutral-900 text-xs tabular-nums${popClass}">${quantity}</span><button data-step="1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform" aria-label="Tăng ${escapeHtml(product.name)}">+</button></div>`
-      : `<button class="w-7 h-7 rounded-lg bg-neutral-900 text-white hover:bg-primary active:scale-90 flex items-center justify-center transition-transform shadow-sm" aria-label="Thêm ${escapeHtml(product.name)}"><span class="material-symbols-outlined text-[16px]">add</span></button>`;
-    card.innerHTML = `<div><div class="w-full aspect-square rounded-xl bg-neutral-100 overflow-hidden relative">${image}${quantity ? `<span class="absolute top-1.5 right-1.5 bg-primary text-white text-[11px] px-2 py-0.5 rounded-full font-bold tabular-nums${popClass}">${quantity}</span>` : ''}</div><h4 class="text-xs font-bold text-neutral-900 mt-1.5 line-clamp-1">${escapeHtml(product.name)}</h4><p class="text-[10px] text-neutral-400 line-clamp-1 mt-0.5">${escapeHtml(product.description || '')}</p></div><div class="mt-2 pt-1.5 border-t border-neutral-100 flex items-center justify-between"><span class="text-xs font-extrabold text-primary">${formatMoney(product.price_vnd)} đ</span>${action}</div>`;
+      ? `<div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200 shrink-0"><button data-step="-1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform" aria-label="Giảm ${escapeHtml(product.name)}">−</button><span class="min-w-[20px] px-0.5 text-center font-bold text-neutral-900 text-xs tabular-nums${popClass}">${quantity}</span><button data-step="1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform" aria-label="Tăng ${escapeHtml(product.name)}">+</button></div>`
+      : `<button class="w-7 h-7 rounded-lg bg-neutral-900 text-white hover:bg-primary active:scale-90 flex items-center justify-center transition-transform shadow-sm shrink-0" aria-label="Thêm ${escapeHtml(product.name)}"><span class="material-symbols-outlined text-[16px]">add</span></button>`;
+    const priceCls = quantity > 0 ? 'text-[11px]' : 'text-xs';
+    card.innerHTML = `<div><div class="w-full aspect-square rounded-xl bg-neutral-100 overflow-hidden relative">${image}${quantity ? `<span class="absolute top-1.5 right-1.5 bg-primary text-white text-[11px] px-2 py-0.5 rounded-full font-bold tabular-nums${popClass}">${quantity}</span>` : ''}</div><h4 class="text-xs font-bold text-neutral-900 mt-1.5 line-clamp-1">${escapeHtml(product.name)}</h4><p class="text-[10px] text-neutral-400 line-clamp-1 mt-0.5">${escapeHtml(product.description || '')}</p></div><div class="mt-2 pt-1.5 border-t border-neutral-100 flex items-center justify-between gap-1"><span class="${priceCls} font-extrabold text-primary whitespace-nowrap tabular-nums">${formatMoney(product.price_vnd)} đ</span>${action}</div>`;
     card.addEventListener('click', () => addToCart(product.id));
     card.querySelectorAll('[data-step]').forEach((button) => {
       button.addEventListener('click', (event) => {
@@ -70,7 +71,17 @@ function updateCartQuantity(id, delta) {
   renderSalesProducts(id);
 }
 
+function pruneCart() {
+  Object.keys(state.cart).forEach((id) => {
+    const product = state.products.find((item) => item.id === id);
+    if (!product || !product.active || !(state.cart[id] > 0)) {
+      delete state.cart[id];
+    }
+  });
+}
+
 function cartTotals() {
+  pruneCart();
   return Object.entries(state.cart).reduce((total, [id, quantity]) => {
     const product = state.products.find((item) => item.id === id);
     if (!product) return total;
@@ -87,10 +98,10 @@ function updateOrderButtonsState() {
   if (dockBtn) {
     dockBtn.disabled = !canOrder;
     if (canOrder) {
-      dockBtn.className = 'flex-1 max-w-[160px] h-10 bg-primary hover:bg-orange-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-98 transition-all cursor-pointer';
+      dockBtn.className = 'shrink-0 min-w-[116px] sm:min-w-[136px] px-3.5 h-10 bg-primary hover:bg-orange-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer';
       dockBtn.innerHTML = `<span>Tạo đơn (${count})</span><span class="material-symbols-outlined text-[16px]">arrow_forward</span>`;
     } else {
-      dockBtn.className = 'flex-1 max-w-[160px] h-10 bg-neutral-200 text-neutral-400 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-none cursor-not-allowed';
+      dockBtn.className = 'shrink-0 min-w-[116px] sm:min-w-[136px] px-3.5 h-10 bg-neutral-200 text-neutral-400 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-none whitespace-nowrap cursor-not-allowed';
       dockBtn.innerHTML = `<span>${state.busy ? 'Đang xử lý…' : 'Tạo đơn'}</span><span class="material-symbols-outlined text-[16px]">arrow_forward</span>`;
     }
   }
@@ -98,7 +109,7 @@ function updateOrderButtonsState() {
   if (sheetBtn) {
     sheetBtn.disabled = !canOrder;
     if (canOrder) {
-      sheetBtn.className = 'flex-1 h-10 bg-primary hover:bg-orange-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-98 transition-all cursor-pointer';
+      sheetBtn.className = 'flex-1 h-10 bg-primary hover:bg-orange-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-[0.98] transition-all cursor-pointer';
       sheetBtn.innerHTML = `<span class="material-symbols-outlined text-[16px]">check</span><span>Tạo đơn (${count})</span>`;
     } else {
       sheetBtn.className = 'flex-1 h-10 bg-neutral-200 text-neutral-400 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 shadow-none cursor-not-allowed';
@@ -149,7 +160,7 @@ function renderCartUI(fromInteraction) {
     if (!product) return;
     const row = document.createElement('div');
     row.className = 'flex items-center justify-between text-xs py-2';
-    row.innerHTML = `<div class="flex-1 pr-2"><p class="font-bold text-neutral-800 line-clamp-1">${escapeHtml(product.name)}</p><span class="text-[11px] text-neutral-400">${formatMoney(product.price_vnd)} đ</span></div><div class="flex items-center gap-2.5"><div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200"><button class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform">−</button><span class="w-6 text-center font-bold text-neutral-900 text-xs tabular-nums">${quantity}</span><button class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform">+</button></div><span class="font-extrabold text-neutral-900 w-16 text-right tabular-nums">${formatMoney(product.price_vnd * quantity)} đ</span></div>`;
+    row.innerHTML = `<div class="min-w-0 flex-1 pr-2"><p class="font-bold text-neutral-800 line-clamp-1">${escapeHtml(product.name)}</p><span class="text-[11px] text-neutral-400 tabular-nums">${formatMoney(product.price_vnd)} đ</span></div><div class="flex items-center gap-2 shrink-0"><div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200"><button class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform">−</button><span class="min-w-[20px] px-0.5 text-center font-bold text-neutral-900 text-xs tabular-nums">${quantity}</span><button class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform">+</button></div><span class="font-extrabold text-neutral-900 min-w-[68px] text-right whitespace-nowrap tabular-nums">${formatMoney(product.price_vnd * quantity)} đ</span></div>`;
     const buttons = row.querySelectorAll('button');
     buttons[0].addEventListener('click', () => updateCartQuantity(id, -1));
     buttons[1].addEventListener('click', () => updateCartQuantity(id, 1));
@@ -158,7 +169,7 @@ function renderCartUI(fromInteraction) {
 }
 
 function openCartSheet() {
-  document.getElementById('sales-cart-sheet')?.classList.remove('hidden');
+  showOverlay(document.getElementById('sales-cart-sheet'));
   requestAnimationFrame(() => positionSlidingPill('sheet-pay-pill', `sheet-pay-${state.paymentMethod}`));
 }
 function closeCartSheet() { hideOverlay(document.getElementById('sales-cart-sheet')); }
@@ -183,6 +194,8 @@ function setPaymentMethod(method) {
 }
 
 async function confirmOrder() {
+  if (state.busy) return;
+  pruneCart();
   const items = Object.entries(state.cart).map(([productId, quantity]) => ({ productId, quantity }));
   if (!items.length || state.busy) return;
   setBusy(true);

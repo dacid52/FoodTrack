@@ -21,8 +21,8 @@ function renderMenuItems(animateList) {
     row.className = 'bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between';
     const image = product.image_uri
       ? `<img src="${escapeHtml(product.image_uri)}" alt="${escapeHtml(product.name)}" class="w-11 h-11 rounded-xl object-cover shrink-0 border border-neutral-100">`
-      : '<div class="w-11 h-11 rounded-xl bg-neutral-100 text-neutral-500 flex items-center justify-center"><span class="material-symbols-outlined">restaurant</span></div>';
-    row.innerHTML = `<div class="flex items-center gap-2.5 min-w-0">${image}<div class="min-w-0"><p class="text-xs font-bold text-neutral-900">${escapeHtml(product.name)}</p><p class="text-xs font-extrabold text-primary mt-0.5">${formatMoney(product.price_vnd)} đ</p></div></div><div class="flex items-center gap-1.5"><label class="relative inline-flex items-center cursor-pointer mr-1"><input type="checkbox" ${product.active ? 'checked' : ''} class="sr-only peer"><div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div></label><button class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700" aria-label="Sửa món"><span class="material-symbols-outlined text-[18px]">edit</span></button><button class="p-1 rounded-lg text-neutral-400 hover:text-red-600" aria-label="Xóa món"><span class="material-symbols-outlined text-[18px]">delete</span></button></div>`;
+      : '<div class="w-11 h-11 rounded-xl bg-neutral-100 text-neutral-500 flex items-center justify-center shrink-0"><span class="material-symbols-outlined">restaurant</span></div>';
+    row.innerHTML = `<div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">${image}<div class="min-w-0 flex-1"><p class="text-xs font-bold text-neutral-900 truncate">${escapeHtml(product.name)}</p><p class="text-xs font-extrabold text-primary tabular-nums whitespace-nowrap mt-0.5">${formatMoney(product.price_vnd)} đ</p></div></div><div class="flex items-center gap-1.5 shrink-0"><label class="relative inline-flex items-center cursor-pointer mr-1"><input type="checkbox" ${product.active ? 'checked' : ''} class="sr-only peer"><div class="w-9 h-5 bg-neutral-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div></label><button class="p-1 rounded-lg text-neutral-400 hover:text-neutral-700" aria-label="Sửa món"><span class="material-symbols-outlined text-[18px]">edit</span></button><button class="p-1 rounded-lg text-neutral-400 hover:text-red-600" aria-label="Xóa món"><span class="material-symbols-outlined text-[18px]">delete</span></button></div>`;
     const controls = row.querySelectorAll('input,button');
     controls[0].addEventListener('change', () => void toggleProductStatus(product.id, controls[0].checked));
     controls[1].addEventListener('click', () => openEditMenuModal(product.id));
@@ -42,8 +42,8 @@ function setMenuStatusFilter(filter) {
   ['all', 'active', 'inactive'].forEach((value) => {
     const button = document.getElementById(`menu-filter-${value}`);
     if (button) button.className = value === state.menuStatusFilter
-      ? 'px-3 py-1 rounded-lg bg-neutral-900 text-white font-semibold'
-      : 'px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600';
+      ? 'px-3 py-1 rounded-lg bg-neutral-900 text-white font-semibold whitespace-nowrap transition-colors'
+      : 'px-3 py-1 rounded-lg bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-50 whitespace-nowrap transition-colors';
   });
   renderMenuItems(true);
 }
@@ -75,7 +75,7 @@ async function deleteProduct(id) {
   if (!product || state.busy) return;
   state.pendingDeleteProductId = id;
   setText('delete-product-name', product.name);
-  document.getElementById('delete-product-modal')?.classList.remove('hidden');
+  showOverlay(document.getElementById('delete-product-modal'));
 }
 
 function closeDeleteProductModal() {
@@ -132,7 +132,7 @@ function openEditMenuModal(id) {
   document.getElementById('menu-form-active').checked = product ? product.active : true;
   updateMenuImagePreview(product?.image_uri || '');
   toggleFormStatusLabel();
-  document.getElementById('menu-modal')?.classList.remove('hidden');
+  showOverlay(document.getElementById('menu-modal'));
 }
 
 function closeMenuModal() { hideOverlay(document.getElementById('menu-modal')); }
@@ -146,6 +146,7 @@ function toggleFormStatusLabel() {
 }
 
 async function saveMenuItem() {
+  if (state.busy) return;
   const id = document.getElementById('menu-form-id')?.value || null;
   const name = document.getElementById('menu-form-name')?.value.trim() || '';
   const price = parseVndInput(document.getElementById('menu-form-price'));
@@ -287,7 +288,7 @@ function openImageCropModal(dataUri) {
     });
   }
   img.onload = () => {
-    modal.classList.remove('hidden');
+    showOverlay(modal);
     requestAnimationFrame(() => {
       const v = viewport.getBoundingClientRect().width;
       crop.img = img;

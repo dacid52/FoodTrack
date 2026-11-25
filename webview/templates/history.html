@@ -1,5 +1,5 @@
 <!-- ================= VIEW 5: LỊCH SỬ GIAO DỊCH (BỘ LỌC THỜI GIAN: NGÀY CỤ THỂ, TUẦN, THÁNG, NĂM) ================= -->
-    <section class="p-3.5 space-y-3 pb-24 hidden" id="view-history">
+    <section class="p-3.5 space-y-3 pb-6 hidden max-w-2xl mx-auto w-full" id="view-history">
       <div class="flex items-center justify-between">
         <div>
           <h2 class="text-base font-bold text-neutral-900">Lịch sử giao dịch</h2>
@@ -16,22 +16,16 @@
         <!-- 4 Nút Lọc Chính: Ngày / Tuần / Tháng / Năm -->
         <div class="relative flex gap-1 p-0.5 bg-neutral-100 rounded-xl text-xs font-semibold text-neutral-600 select-none" id="hist-time-bar"><div class="ft-pill absolute top-0.5 bottom-0.5 left-0 bg-white rounded-lg shadow-sm pointer-events-none" id="hist-time-pill"></div><button class="flex-1 relative py-1 rounded-lg font-bold text-neutral-900 text-center text-[11px] whitespace-nowrap transition-colors" id="hist-time-day" onclick="setHistoryTimeMode('day')">Ngày</button><button class="flex-1 relative py-1 rounded-lg text-neutral-500 hover:text-neutral-900 text-center text-[11px] whitespace-nowrap transition-colors" id="hist-time-month" onclick="setHistoryTimeMode('month')">Tháng</button><button class="flex-1 relative py-1 rounded-lg text-neutral-500 hover:text-neutral-900 text-center text-[11px] whitespace-nowrap transition-colors" id="hist-time-year" onclick="setHistoryTimeMode('year')">Năm</button></div>
 
-        <!-- Bộ chọn kỳ tùy chỉnh đẹp mắt (thay thế hoàn toàn input/select mặc định) -->
+        <!-- Bộ chọn kỳ gọn gàng: bấm mở lịch + nút quay nhanh kỳ hiện tại -->
         <div class="pt-0.5 flex items-center gap-2">
-          <div class="flex-1 min-w-0 flex items-center bg-neutral-50 border border-neutral-200/80 rounded-xl p-0.5">
-            <button type="button" class="w-7 h-7 rounded-lg flex items-center justify-center text-neutral-600 hover:bg-white hover:shadow-sm active:scale-90 transition-all shrink-0" onclick="stepHistoryPeriod(-1)" aria-label="Kỳ trước">
-              <span class="material-symbols-outlined text-[17px]">chevron_left</span>
-            </button>
-            <button type="button" class="flex-1 min-w-0 flex items-center justify-center gap-1 py-1 px-1.5 rounded-lg hover:bg-white active:scale-[0.98] transition-all" id="hist-picker-trigger" onclick="openHistoryDatePicker()">
-              <span class="material-symbols-outlined text-[14px] text-neutral-400 shrink-0">calendar_month</span>
-              <span class="text-[11px] font-bold text-neutral-800 truncate tabular-nums" id="hist-picker-label">Hôm nay • 25/11/2026</span>
-              <span class="material-symbols-outlined text-[14px] text-neutral-400 shrink-0">expand_more</span>
-            </button>
-            <button type="button" class="w-7 h-7 rounded-lg flex items-center justify-center text-neutral-600 hover:bg-white hover:shadow-sm active:scale-90 transition-all shrink-0 disabled:opacity-30 disabled:pointer-events-none" id="hist-step-next" onclick="stepHistoryPeriod(1)" aria-label="Kỳ sau">
-              <span class="material-symbols-outlined text-[17px]">chevron_right</span>
-            </button>
-          </div>
-          <button type="button" class="shrink-0 h-8 px-2.5 rounded-xl text-[11px] font-semibold bg-neutral-100 text-neutral-400 active:scale-95 transition-all flex items-center justify-center whitespace-nowrap" id="hist-day-today" onclick="jumpHistoryToCurrent()">
+          <button type="button" class="flex-1 min-w-0 h-9 flex items-center justify-between gap-2 bg-neutral-50 border border-neutral-200/80 rounded-xl px-3 hover:bg-neutral-100/70 active:scale-[0.99] transition-all" id="hist-picker-trigger" onclick="openHistoryDatePicker()">
+            <span class="flex items-center gap-2 min-w-0">
+              <span class="material-symbols-outlined text-[16px] text-neutral-400 shrink-0">calendar_month</span>
+              <span class="text-xs font-bold text-neutral-800 whitespace-nowrap tabular-nums" id="hist-picker-label">26/11/2026</span>
+            </span>
+            <span class="material-symbols-outlined text-[16px] text-neutral-400 shrink-0">expand_more</span>
+          </button>
+          <button type="button" class="shrink-0 h-9 px-3 rounded-xl text-[11px] font-semibold bg-neutral-100 text-neutral-400 active:scale-95 transition-all flex items-center justify-center whitespace-nowrap" id="hist-day-today" onclick="jumpHistoryToCurrent()">
             <span id="hist-today-label">Hôm nay</span>
           </button>
         </div>
@@ -58,16 +52,16 @@
       <!-- Ô tìm kiếm giao dịch -->
       <div class="relative">
         <span class="material-symbols-outlined text-neutral-400 absolute left-3 top-2.5 text-[18px]">search</span>
-        <input class="w-full bg-white pl-9 pr-4 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder-neutral-400" id="history-search-input" oninput="filterHistoryList()" type="text">
+        <input class="w-full bg-white pl-9 pr-4 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder-neutral-400" id="history-search-input" oninput="filterHistoryList()" placeholder="Tìm đơn hàng, khoản chi..." type="text">
       </div>
 
       <!-- Filter loại giao dịch: Tất cả, Đơn hàng, Nhập hàng, Chi khác -->
-      <div class="relative flex gap-1 p-1 bg-neutral-100 rounded-xl text-xs font-medium text-neutral-600 overflow-x-auto hide-scrollbar" id="hist-filter-bar">
+      <div class="relative flex gap-1 p-1 bg-neutral-100 rounded-xl text-[11px] font-medium text-neutral-600 select-none" id="hist-filter-bar">
         <div class="ft-pill absolute top-1 bottom-1 left-0 bg-white rounded-lg shadow-sm pointer-events-none" id="hist-filter-pill"></div>
-        <button class="flex-1 relative py-1.5 px-2 rounded-lg font-semibold text-neutral-900 shrink-0 text-center transition-colors" id="hist-filter-all" onclick="setHistoryFilter('all')">Tất cả</button>
-        <button class="flex-1 relative py-1.5 px-2 rounded-lg text-neutral-500 hover:text-neutral-900 shrink-0 text-center transition-colors" id="hist-filter-order" onclick="setHistoryFilter('order')">Đơn hàng</button>
-        <button class="flex-1 relative py-1.5 px-2 rounded-lg text-neutral-500 hover:text-neutral-900 shrink-0 text-center transition-colors" id="hist-filter-cost_import" onclick="setHistoryFilter('cost_import')">Nhập hàng</button>
-        <button class="flex-1 relative py-1.5 px-2 rounded-lg text-neutral-500 hover:text-neutral-900 shrink-0 text-center transition-colors" id="hist-filter-cost_other" onclick="setHistoryFilter('cost_other')">Chi khác</button>
+        <button class="flex-1 relative py-1.5 px-1 rounded-lg font-semibold text-neutral-900 whitespace-nowrap text-center transition-colors" id="hist-filter-all" onclick="setHistoryFilter('all')">Tất cả</button>
+        <button class="flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 whitespace-nowrap text-center transition-colors" id="hist-filter-order" onclick="setHistoryFilter('order')">Đơn hàng</button>
+        <button class="flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 whitespace-nowrap text-center transition-colors" id="hist-filter-cost_import" onclick="setHistoryFilter('cost_import')">Nhập hàng</button>
+        <button class="flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 whitespace-nowrap text-center transition-colors" id="hist-filter-cost_other" onclick="setHistoryFilter('cost_other')">Chi khác</button>
       </div>
 
       <!-- Danh sách thẻ giao dịch cập nhật theo khoảng thời gian -->
@@ -85,7 +79,7 @@
             <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
               <span>11:24 - Hôm nay</span>
               <span>•</span>
-              <span class="px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
+              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
             </div>
           </div>
         </div>
@@ -107,7 +101,7 @@
             <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
               <span>11:15 - Hôm nay</span>
               <span>•</span>
-              <span class="px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 font-medium">Chuyển khoản</span>
+              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Chuyển khoản</span>
             </div>
           </div>
         </div>
@@ -129,7 +123,7 @@
             <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
               <span>09:30 - Hôm nay</span>
               <span>•</span>
-              <span class="px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
+              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
             </div>
           </div>
         </div>
@@ -151,7 +145,7 @@
             <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
               <span>08:45 - Hôm nay</span>
               <span>•</span>
-              <span class="px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
+              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
             </div>
           </div>
         </div>
@@ -173,7 +167,7 @@
             <div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1">
               <span>08:20 - Hôm nay</span>
               <span>•</span>
-              <span class="px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
+              <span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">Tiền mặt</span>
             </div>
           </div>
         </div>

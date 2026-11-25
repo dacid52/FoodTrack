@@ -158,7 +158,8 @@ function selectStatsChartBar(index) {
   const setDetailVal = (id, amount, signPrefix, color) => {
     const el = document.getElementById(id);
     if (!el) return;
-    el.className = `font-bold ${color} ${subSize} whitespace-nowrap mt-0.5`;
+    const tone = amount > 0 ? color : 'text-neutral-400';
+    el.className = `font-bold ${tone} ${subSize} whitespace-nowrap mt-0.5 transition-colors duration-200`;
     animateNumberText(el, amount, (v) => (v > 0 ? `${signPrefix}${formatMoney(v)}đ` : '0 đ'));
   };
   setDetailVal('stats-detail-rev', pt.revenue || 0, '+', 'text-emerald-700');
@@ -515,8 +516,12 @@ async function refreshStats() {
         const todayIdx = points.findIndex((p) => p.key === todayIso);
         if (todayIdx >= 0) defaultIdx = todayIdx;
       } else if (state.statsPeriod === 'month') {
+        let foundData = false;
         for (let i = points.length - 1; i >= 0; i -= 1) {
-          if (points[i].revenue > 0 || points[i].cost > 0) { defaultIdx = i; break; }
+          if (points[i].revenue > 0 || points[i].cost > 0) { defaultIdx = i; foundData = true; break; }
+        }
+        if (!foundData && offset === 0) {
+          defaultIdx = Math.min(points.length - 1, Math.floor((new Date().getDate() - 1) / 7));
         }
       }
       renderDualBarChart(points, defaultIdx);

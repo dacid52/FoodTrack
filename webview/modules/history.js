@@ -34,16 +34,10 @@ function isHistoryAtCurrent() {
 function formatHistoryPickerLabel() {
   if (state.historyTimeMode === 'day') {
     const iso = state.historyCustomDate || localDate();
-    const todayIso = localDate();
-    const dmy = iso.split('-').reverse().join('/');
-    if (iso === todayIso) return `Hôm nay • ${dmy}`;
-    if (iso === dateOffsetString(todayIso, -1)) return `Hôm qua • ${dmy}`;
-    const wdNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-    const wd = wdNames[new Date(`${iso}T12:00:00`).getDay()];
-    return `${wd} • ${dmy}`;
+    return iso.split('-').reverse().join('/');
   }
   if (state.historyTimeMode === 'month') {
-    return `Tháng ${state.historySelectedMonth} • ${state.historySelectedYear}`;
+    return `Tháng ${state.historySelectedMonth}/${state.historySelectedYear}`;
   }
   return `Năm ${state.historySelectedYear}`;
 }
@@ -51,8 +45,6 @@ function formatHistoryPickerLabel() {
 function updateHistoryPeriodBar() {
   setText('hist-picker-label', formatHistoryPickerLabel());
   const atCurrent = isHistoryAtCurrent();
-  const nextBtn = document.getElementById('hist-step-next');
-  if (nextBtn) nextBtn.disabled = atCurrent;
 
   const jumpLabels = { day: 'Hôm nay', month: 'Tháng này', year: 'Năm nay' };
   setText('hist-today-label', jumpLabels[state.historyTimeMode] || 'Hôm nay');
@@ -60,8 +52,8 @@ function updateHistoryPeriodBar() {
   const jumpBtn = document.getElementById('hist-day-today');
   if (jumpBtn) {
     jumpBtn.className = atCurrent
-      ? 'shrink-0 h-8 px-2.5 rounded-xl text-[11px] font-semibold bg-neutral-100 text-neutral-400 active:scale-95 transition-all flex items-center justify-center whitespace-nowrap'
-      : 'shrink-0 h-8 px-2.5 rounded-xl text-[11px] font-bold bg-neutral-900 text-white shadow-sm active:scale-95 transition-all flex items-center justify-center whitespace-nowrap';
+      ? 'shrink-0 h-9 px-3 rounded-xl text-[11px] font-semibold bg-neutral-100 text-neutral-400 active:scale-95 transition-all flex items-center justify-center whitespace-nowrap'
+      : 'shrink-0 h-9 px-3 rounded-xl text-[11px] font-bold bg-neutral-900 text-white shadow-sm active:scale-95 transition-all flex items-center justify-center whitespace-nowrap';
   }
 }
 
@@ -144,12 +136,7 @@ function openHistoryDatePicker() {
     _histPickerViewMonth = state.historySelectedMonth || (now.getMonth() + 1);
   }
   renderHistoryPickerModal();
-  const modal = document.getElementById('history-date-picker-modal');
-  if (modal) {
-    delete modal.dataset.ftClosing;
-    modal.classList.remove('ft-overlay-out', 'ft-sheet-settled', 'hidden');
-    resetSheetDragStyles(modal, true);
-  }
+  showOverlay(document.getElementById('history-date-picker-modal'));
 }
 
 function closeHistoryDatePicker() {
@@ -263,7 +250,7 @@ function renderHistoryPickerModal(slideDir, animateSelection) {
     // Các ngày mờ của tháng trước để lấp đều hàng đầu
     for (let i = startOffset - 1; i >= 0; i -= 1) {
       const prevD = prevMonthDays - i;
-      cellsHtml += `<div class="flex items-center justify-center h-11"><span class="text-xs font-medium text-neutral-200 tabular-nums select-none">${prevD}</span></div>`;
+      cellsHtml += `<div class="flex items-center justify-center h-10 sm:h-11"><span class="text-xs font-medium text-neutral-200 tabular-nums select-none">${prevD}</span></div>`;
     }
 
     const yStr = String(_histPickerViewYear);
@@ -280,15 +267,15 @@ function renderHistoryPickerModal(slideDir, animateSelection) {
         : (dayNet >= 0 ? 'bg-emerald-500' : 'bg-orange-400');
 
       const circleCls = isFuture
-        ? 'w-10 h-10 rounded-full flex flex-col items-center justify-center text-xs font-medium text-neutral-300 pointer-events-none tabular-nums'
+        ? 'w-9 h-9 sm:w-10 sm:h-10 rounded-full flex flex-col items-center justify-center text-xs font-medium text-neutral-300 pointer-events-none tabular-nums'
         : isSelected
-          ? `w-10 h-10 rounded-full flex flex-col items-center justify-center text-[13px] font-bold bg-gradient-to-br from-[#32343a] to-[#1a1b1e] text-white shadow-md active:scale-95 transition-all tabular-nums${pickPopCls}`
+          ? `w-9 h-9 sm:w-10 sm:h-10 rounded-full flex flex-col items-center justify-center text-[13px] font-bold bg-gradient-to-br from-[#32343a] to-[#1a1b1e] text-white shadow-md active:scale-95 transition-all tabular-nums${pickPopCls}`
           : isToday
-            ? 'w-10 h-10 rounded-full flex flex-col items-center justify-center text-[13px] font-bold text-primary bg-orange-50/70 ring-1 ring-primary/45 hover:bg-orange-100/60 active:scale-95 transition-all tabular-nums'
-            : 'w-10 h-10 rounded-full flex flex-col items-center justify-center text-[13px] font-semibold text-neutral-700 hover:bg-neutral-100 active:scale-95 transition-all tabular-nums';
+            ? 'w-9 h-9 sm:w-10 sm:h-10 rounded-full flex flex-col items-center justify-center text-[13px] font-bold text-primary bg-orange-50/70 ring-1 ring-primary/45 hover:bg-orange-100/60 active:scale-95 transition-all tabular-nums'
+            : 'w-9 h-9 sm:w-10 sm:h-10 rounded-full flex flex-col items-center justify-center text-[13px] font-semibold text-neutral-700 hover:bg-neutral-100 active:scale-95 transition-all tabular-nums';
 
       cellsHtml += `
-        <div class="flex items-center justify-center h-11">
+        <div class="flex items-center justify-center h-10 sm:h-11">
           <button type="button" class="${circleCls}" ${isFuture ? 'disabled' : `onclick="pickHistoryDate('${iso}')"`}>
             <span class="leading-none">${d}</span>
             <span class="w-1 h-1 rounded-full mt-1 ${hasTx && !isFuture ? dotColor : 'opacity-0'}"></span>
@@ -300,7 +287,7 @@ function renderHistoryPickerModal(slideDir, animateSelection) {
     // Các ngày mờ của tháng sau để lấp đều hàng cuối
     const trailing = totalCells - (startOffset + daysInMonth);
     for (let nextD = 1; nextD <= trailing; nextD += 1) {
-      cellsHtml += `<div class="flex items-center justify-center h-11"><span class="text-xs font-medium text-neutral-200 tabular-nums select-none">${nextD}</span></div>`;
+      cellsHtml += `<div class="flex items-center justify-center h-10 sm:h-11"><span class="text-xs font-medium text-neutral-200 tabular-nums select-none">${nextD}</span></div>`;
     }
 
     body.innerHTML = `
@@ -392,8 +379,8 @@ function setHistoryFilter(filter) {
   ['all', 'order', 'cost_import', 'cost_other'].forEach((value) => {
     const button = document.getElementById(`hist-filter-${value}`);
     if (button) button.className = value === filter
-      ? 'flex-1 relative py-1.5 px-2 rounded-lg font-semibold text-neutral-900 shrink-0 text-center transition-colors'
-      : 'flex-1 relative py-1.5 px-2 rounded-lg text-neutral-500 hover:text-neutral-900 shrink-0 text-center transition-colors';
+      ? 'flex-1 relative py-1.5 px-1 rounded-lg font-semibold text-neutral-900 whitespace-nowrap text-center transition-colors'
+      : 'flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 whitespace-nowrap text-center transition-colors';
   });
   updateHistFilterPill();
   renderHistoryView();
@@ -470,7 +457,7 @@ function renderHistoryView() {
     const purchase = transaction.type === 'cost_import';
     const row = document.createElement('div');
     row.className = 'bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-sm flex items-start justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.99] transition-all';
-    row.innerHTML = `<div class="flex items-start gap-3 flex-1 min-w-0 pr-2"><div class="w-9 h-9 rounded-xl ${order ? 'bg-emerald-50 text-emerald-600' : purchase ? 'bg-orange-50 text-orange-600' : 'bg-neutral-100 text-neutral-700'} flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[18px]">${order ? 'point_of_sale' : purchase ? 'inventory_2' : 'receipt_long'}</span></div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-xs font-bold text-neutral-900">${escapeHtml(transaction.title)}</span><span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${order ? 'bg-emerald-50 text-emerald-700' : purchase ? 'bg-orange-50 text-orange-700' : 'bg-neutral-100 text-neutral-700'}">${order ? 'Đơn hàng' : purchase ? 'Tiền nhập hàng' : 'Chi phí khác'}</span></div><p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">${escapeHtml(transaction.desc || 'Chi tiết giao dịch')}</p><div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1"><span>${escapeHtml(transaction.time)}</span><span>•</span><span class="px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 font-medium">${escapeHtml(transaction.method)}</span></div></div></div><div class="text-right shrink-0"><span class="text-xs font-extrabold ${transaction.amount > 0 ? 'text-emerald-600' : 'text-orange-600'}">${transaction.amount > 0 ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ</span><span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span></div>`;
+    row.innerHTML = `<div class="flex items-start gap-3 flex-1 min-w-0 pr-2"><div class="w-9 h-9 rounded-xl ${order ? 'bg-emerald-50 text-emerald-600' : purchase ? 'bg-orange-50 text-orange-600' : 'bg-neutral-100 text-neutral-700'} flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[18px]">${order ? 'point_of_sale' : purchase ? 'inventory_2' : 'receipt_long'}</span></div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-xs font-bold text-neutral-900">${escapeHtml(transaction.title)}</span><span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${order ? 'bg-emerald-50 text-emerald-700' : purchase ? 'bg-orange-50 text-orange-700' : 'bg-neutral-100 text-neutral-700'}">${order ? 'Đơn hàng' : purchase ? 'Tiền nhập hàng' : 'Chi phí khác'}</span></div><p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">${escapeHtml(transaction.desc || 'Chi tiết giao dịch')}</p><div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1"><span>${escapeHtml(transaction.time)}</span><span>•</span><span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">${escapeHtml(transaction.method)}</span></div></div></div><div class="text-right shrink-0"><span class="text-xs font-extrabold whitespace-nowrap tabular-nums ${transaction.amount > 0 ? 'text-emerald-600' : 'text-orange-600'}">${transaction.amount > 0 ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ</span><span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span></div>`;
     row.addEventListener('click', () => void openTxDetailModal(transaction));
     listNode.appendChild(row);
   });

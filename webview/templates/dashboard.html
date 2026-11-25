@@ -1,19 +1,23 @@
     <!-- ================= VIEW 1: TỔNG QUAN (LỢI NHUẬN LÀ CHỈ SỐ NỔI BẬT NHẤT) ================= -->
-    <section class="p-3.5 space-y-3 pb-24" id="view-dashboard">
-      <div class="flex items-center justify-between pt-0.5">
-        <div>
+    <section class="p-3.5 space-y-3 pb-4 max-w-2xl mx-auto w-full" id="view-dashboard">
+      <div class="flex items-center justify-between gap-2 pt-0.5">
+        <div class="min-w-0">
           <p class="text-[11px] text-neutral-500 font-medium">Hôm nay • 24/10/2025</p>
-          <h2 class="text-base font-bold text-neutral-900" id="dash-greeting">Chúc nay đắt khách!</h2>
+          <h2 class="text-base font-bold text-neutral-900 truncate" id="dash-greeting">Chúc nay đắt khách!</h2>
         </div>
+        <button type="button" class="shrink-0 px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-neutral-900 text-white flex items-center gap-1 active:scale-95 transition-all shadow-sm" onclick="openExpenseModal('import')">
+          <span class="material-symbols-outlined text-[15px]">add</span>
+          <span>Ghi chi</span>
+        </button>
       </div>
 
       <!-- Filter Thời gian Dashboard -->
-      <div class="relative flex gap-1 p-1 bg-neutral-100 rounded-xl text-xs font-medium text-neutral-600" id="dash-filter-bar">
+      <div class="relative flex gap-1 p-1 bg-neutral-100 rounded-xl text-[11px] sm:text-xs font-medium text-neutral-600 select-none" id="dash-filter-bar">
         <div class="ft-pill absolute top-1 bottom-1 left-0 bg-white rounded-lg shadow-sm pointer-events-none" id="dash-filter-pill"></div>
-        <button class="flex-1 relative py-1.5 rounded-lg font-semibold text-neutral-900 text-center transition-colors" id="dash-filter-today" onclick="setDashboardFilter('today')">Hôm nay</button>
-        <button class="flex-1 relative py-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 text-center transition-colors" id="dash-filter-yesterday" onclick="setDashboardFilter('yesterday')">Hôm qua</button>
-        <button class="flex-1 relative py-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 text-center transition-colors" id="dash-filter-7days" onclick="setDashboardFilter('7days')">7 ngày</button>
-        <button class="flex-1 relative py-1.5 rounded-lg text-neutral-500 hover:text-neutral-900 text-center transition-colors" id="dash-filter-month" onclick="setDashboardFilter('month')">Tháng này</button>
+        <button class="flex-1 relative py-1.5 px-1 rounded-lg font-semibold text-neutral-900 text-center whitespace-nowrap transition-colors" id="dash-filter-today" onclick="setDashboardFilter('today')">Hôm nay</button>
+        <button class="flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 text-center whitespace-nowrap transition-colors" id="dash-filter-yesterday" onclick="setDashboardFilter('yesterday')">Hôm qua</button>
+        <button class="flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 text-center whitespace-nowrap transition-colors" id="dash-filter-7days" onclick="setDashboardFilter('7days')">7 ngày</button>
+        <button class="flex-1 relative py-1.5 px-1 rounded-lg text-neutral-500 hover:text-neutral-900 text-center whitespace-nowrap transition-colors" id="dash-filter-month" onclick="setDashboardFilter('month')">Tháng này</button>
       </div>
 
       <!-- CARD HERO NGUYÊN KHỐI THAN XÁM CHUYỂN SẮC NHẸ TỪ TRÁI TRÊN XUỐNG PHẢI DƯỚI -->
@@ -67,37 +71,6 @@
         </div>
       </div>
 
-      <!-- Thao tác nhanh -->
-      <div>
-        <h3 class="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-2">Thao tác nhanh</h3>
-        <div class="grid grid-cols-4 gap-2">
-          <button class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 flex flex-col items-center gap-1.5 active:scale-95 transition-all shadow-sm" onclick="switchTab('sales')">
-            <div class="w-10 h-10 rounded-xl bg-orange-50 text-primary flex items-center justify-center">
-              <span class="material-symbols-outlined text-[20px]">point_of_sale</span>
-            </div>
-            <span class="text-[11px] font-semibold text-neutral-800">Tạo đơn</span>
-          </button>
-          <button class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 flex flex-col items-center gap-1.5 active:scale-95 transition-all shadow-sm" onclick="openExpenseModal('import')">
-            <div class="w-10 h-10 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center">
-              <span class="material-symbols-outlined text-[20px]">inventory_2</span>
-            </div>
-            <span class="text-[11px] font-semibold text-neutral-800">Nhập</span>
-          </button>
-          <button class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 flex flex-col items-center gap-1.5 active:scale-95 transition-all shadow-sm" onclick="openExpenseModal('other')">
-            <div class="w-10 h-10 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center">
-              <span class="material-symbols-outlined text-[20px]">receipt_long</span>
-            </div>
-            <span class="text-[11px] font-semibold text-neutral-800">Chi phí</span>
-          </button>
-          <button class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 flex flex-col items-center gap-1.5 active:scale-95 transition-all shadow-sm" onclick="switchTab('history')">
-            <div class="w-10 h-10 rounded-xl bg-neutral-100 text-neutral-700 flex items-center justify-center">
-              <span class="material-symbols-outlined text-[20px]">history</span>
-            </div>
-            <span class="text-[11px] font-semibold text-neutral-800">Lịch sử</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Giao dịch gần đây -->
       <div>
         <div class="flex justify-between items-center mb-2">
@@ -106,7 +79,7 @@
             Xem tất cả <span class="material-symbols-outlined text-[14px]">chevron_right</span>
           </button>
         </div>
-        <div class="space-y-2" id="dash-transaction-list"><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-98 transition-all">
+        <div class="space-y-2" id="dash-transaction-list"><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.98] transition-all">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
             <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
@@ -120,7 +93,7 @@
           <span class="text-xs font-bold text-emerald-600">+75.000 đ</span>
           <span class="block text-[9px] text-neutral-400">Chi tiết ›</span>
         </div>
-      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-98 transition-all">
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.98] transition-all">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
             <span class="material-symbols-outlined text-[16px]">arrow_downward</span>
@@ -134,7 +107,7 @@
           <span class="text-xs font-bold text-emerald-600">+50.000 đ</span>
           <span class="block text-[9px] text-neutral-400">Chi tiết ›</span>
         </div>
-      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-98 transition-all">
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.98] transition-all">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
             <span class="material-symbols-outlined text-[16px]">arrow_upward</span>
@@ -148,7 +121,7 @@
           <span class="text-xs font-bold text-orange-600">-350.000 đ</span>
           <span class="block text-[9px] text-neutral-400">Chi tiết ›</span>
         </div>
-      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-98 transition-all">
+      </div><div class="bg-white p-2.5 rounded-2xl border border-neutral-200/80 shadow-sm flex items-center justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.98] transition-all">
         <div class="flex items-center gap-2.5">
           <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
             <span class="material-symbols-outlined text-[16px]">arrow_upward</span>

@@ -127,6 +127,7 @@ Object.assign(window, {
   pickHistoryDate,
   pickHistoryMonth,
   pickHistoryYear,
+  pickProductImage,
   promptDeleteOrder,
   removeEditOrderItem,
   resetStatsOffset,
@@ -160,6 +161,13 @@ function setInitialDisplay() {
   ensureImagePickerButton();
   initializeHistoryControls();
   switchTab('dashboard');
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => {
+      if (state.currentTab === 'dashboard') updateDashFilterPill();
+      if (state.currentTab === 'stats') updateStatsTabPill();
+      if (state.currentTab === 'history') { updateHistTimePill(); updateHistFilterPill(); }
+    }).catch(() => {});
+  }
   let attempts = 0;
   const boot = () => {
     refreshAll().catch((error) => {
@@ -176,6 +184,41 @@ function setInitialDisplay() {
 
 window.FoodTrack = { refresh: () => refreshAll().catch(reportError), switchTab };
 
+// Tự cuộn ô đang nhập vào vùng nhìn thấy khi bàn phím mở trên tất cả modal & trang
+document.addEventListener('focusin', (event) => {
+  const target = event.target;
+  if (!(target instanceof HTMLElement)) return;
+  if (!target.matches('input, textarea, select')) return;
+  // Đánh dấu settled các modal đang mở để không chạy lại animation ftSheetUp khi viewport co theo bàn phím
+  Object.keys(modalClosers).forEach((id) => {
+    const el = document.getElementById(id);
+    if (el && !el.classList.contains('hidden')) el.classList.add('ft-sheet-settled');
+  });
+  setTimeout(() => {
+    try { target.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch {}
+  }, 160);
+});
+
+// Đồng bộ lại vị trí các thanh trượt pill khi kích thước WebView thay đổi
+window.addEventListener('resize', () => {
+  if (state.currentTab === 'dashboard') updateDashFilterPill();
+  if (state.currentTab === 'stats') updateStatsTabPill();
+  if (state.currentTab === 'history') { updateHistTimePill(); updateHistFilterPill(); }
+  if (!document.getElementById('expense-modal')?.classList.contains('hidden')) {
+    positionSlidingPill('exp-type-pill', `exp-type-${state.expenseType}`);
+    positionSlidingPill('exp-pay-pill', `exp-pay-${state.expensePayMethod}`);
+  }
+  if (!document.getElementById('sales-cart-sheet')?.classList.contains('hidden')) {
+    positionSlidingPill('sheet-pay-pill', `sheet-pay-${state.paymentMethod}`);
+  }
+  const activeEl = document.activeElement;
+  if (activeEl instanceof HTMLElement && activeEl.matches('input, textarea, select')) {
+    setTimeout(() => {
+      try { activeEl.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {}
+    }, 60);
+  }
+});
+
 const modalClosers = {
   'expense-modal': closeExpenseModal,
   'menu-modal': closeMenuModal,
@@ -186,6 +229,50 @@ const modalClosers = {
   'sales-cart-sheet': closeCartSheet,
   'history-date-picker-modal': closeHistoryDatePicker,
   'image-crop-modal': closeImageCropModal,
+};
+
+// Thứ tự ưu tiên đóng modal từ lớp cao nhất xuống thấp nhất khi bấm Back / vuốt cạnh Android
+const MODAL_BACK_ORDER = [
+  'image-crop-modal',
+  'delete-product-modal',
+  'delete-order-confirm-modal',
+  'expense-modal',
+  'edit-order-modal',
+  'history-date-picker-modal',
+  'tx-detail-modal',
+  'sales-cart-sheet',
+  'menu-modal',
+];
+
+let _lastHardwareBackAt = 0;
+
+window.__ftHandleHardwareBack = function () {
+  // 1. Nếu có popup / bottom sheet đang mở -> đóng lớp trên cùng trước
+  for (const id of MODAL_BACK_ORDER) {
+    const el = document.getElementById(id);
+    if (el && !el.classList.contains('hidden') && !el.classList.contains('ft-overlay-out')) {
+      modalClosers[id]?.();
+      _lastHardwareBackAt = 0;
+      return;
+    }
+  }
+  // 2. Nếu đang ở tab khác -> quay về Tổng quan
+  if (state.currentTab !== 'dashboard') {
+    switchTab('dashboard');
+    _lastHardwareBackAt = 0;
+    return;
+  }
+  // 3. Đang ở Tổng quan -> yêu cầu nhấn quay lại lần 2 trong 2 giây mới thoát app
+  const now = Date.now();
+  if (now - _lastHardwareBackAt < 2000) {
+    _lastHardwareBackAt = 0;
+    if (window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function') {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ id: 'ft-exit', method: 'app.exit', payload: {} }));
+    }
+    return;
+  }
+  _lastHardwareBackAt = now;
+  showToast('Nhấn quay lại lần nữa để thoát', 'info');
 };
 
 // Đồng bộ parallax nhẹ cho nền sáng & xếp chồng modal con
@@ -382,7 +469,9 @@ document.addEventListener('click', (event) => {
       current.panel.style.transform = 'translateY(100%)';
       current.overlay.style.transition = 'background-color 0.18s ease-out';
       current.overlay.style.setProperty('background-color', 'rgba(0, 0, 0, 0)', 'important');
-      setTimeout(() => {
+      if (current.overlay._ftHideTimer) clearTimeout(current.overlay._ftHideTimer);
+      current.overlay._ftHideTimer = setTimeout(() => {
+        current.overlay._ftHideTimer = null;
         current.overlay.dataset.ftDraggedOut = '1';
         current.closer();
         window.__foodTrackRepaint?.();
