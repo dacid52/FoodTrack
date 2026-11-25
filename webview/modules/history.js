@@ -391,15 +391,22 @@ function filterHistoryList() {
   renderHistoryView();
 }
 
+let _historyRefreshReqId = 0;
+
 async function refreshHistory() {
+  const reqId = ++_historyRefreshReqId;
   const range = historyRange();
   updateHistTimePill();
   updateHistFilterPill();
   updateHistoryPeriodBar();
   try {
-    state.historyTransactions = await requestNative('history.list', { ...range, limit: 200 });
+    const rows = await requestNative('history.list', { ...range, limit: 200 });
+    if (reqId !== _historyRefreshReqId) return;
+    state.historyTransactions = rows;
     renderHistoryView();
-  } catch (error) { reportError(error); }
+  } catch (error) {
+    if (reqId === _historyRefreshReqId) reportError(error);
+  }
 }
 
 function renderHistoryView() {

@@ -106,7 +106,10 @@ function updateDashFilterPill() {
   }
 }
 
+let _dashFilterReqId = 0;
+
 async function setDashboardFilter(period) {
+  const reqId = ++_dashFilterReqId;
   state.currentDashboardFilter = period;
   ['today', 'yesterday', '7days', 'month'].forEach((key) => {
     const button = document.getElementById(`dash-filter-${key}`);
@@ -126,6 +129,9 @@ async function setDashboardFilter(period) {
     ]);
     state.summaries[period] = summary;
     state.previousSummaries[period] = previous;
+    if (reqId !== _dashFilterReqId) return;
     renderDashboard();
-  } catch (error) { reportError(error); }
+  } catch (error) {
+    if (reqId === _dashFilterReqId) reportError(error);
+  }
 }

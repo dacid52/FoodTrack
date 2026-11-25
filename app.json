@@ -7,7 +7,7 @@
     "jsEngine": "hermes",
     "icon": "./assets/images/icon.png",
     "scheme": "foodtrack",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "ios": {
       "bundleIdentifier": "com.foodtrack.app",
       "supportsTablet": true

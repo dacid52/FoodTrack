@@ -1,7 +1,7 @@
 import { Asset } from 'expo-asset';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, BackHandler, KeyboardAvoidingView, Platform, Pressable, Text } from 'react-native';
+import { ActivityIndicator, AppState, BackHandler, KeyboardAvoidingView, Platform, Pressable, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import WebView, { type WebViewMessageEvent } from 'react-native-webview';
 
@@ -57,6 +57,18 @@ export function FoodTrackWebView() {
     }
     webView.current?.injectJavaScript('window.FoodTrack && window.FoodTrack.refresh(); true;');
   }, []));
+
+  // Làm mới dữ liệu & câu chào/ngày hiện tại khi mở lại app từ nền (ví dụ qua ngày mới)
+  useEffect(() => {
+    let lastState = AppState.currentState;
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (lastState !== 'active' && nextState === 'active') {
+        webView.current?.injectJavaScript('window.FoodTrack && window.FoodTrack.refresh(); true;');
+      }
+      lastState = nextState;
+    });
+    return () => subscription.remove();
+  }, []);
 
   // Chặn nút Back / vuốt cạnh trên Android để đóng modal, lùi về Tổng quan, hoặc nhấn 2 lần mới thoát app
   useEffect(() => {
@@ -198,6 +210,7 @@ export function FoodTrackWebView() {
           hideKeyboardAccessoryView
           androidLayerType="hardware"
           overScrollMode="never"
+          forceDarkOn={false}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>

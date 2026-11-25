@@ -2,7 +2,7 @@
     <section class="p-3.5 space-y-3 pb-4 max-w-2xl mx-auto w-full" id="view-dashboard">
       <div class="flex items-center justify-between gap-2 pt-0.5">
         <div class="min-w-0">
-          <p class="text-[11px] text-neutral-500 font-medium">Hôm nay • 24/10/2025</p>
+          <p class="text-[11px] text-neutral-500 font-medium" id="dash-date-label">Hôm nay</p>
           <h2 class="text-base font-bold text-neutral-900 truncate" id="dash-greeting">Chúc nay đắt khách!</h2>
         </div>
         <button type="button" class="shrink-0 px-2.5 py-1.5 text-xs font-semibold rounded-xl bg-neutral-900 text-white flex items-center gap-1 active:scale-95 transition-all shadow-sm" onclick="openExpenseModal('import')">
@@ -28,12 +28,12 @@
               <span class="w-2 h-2 rounded-full bg-emerald-400 transition-colors duration-200" id="dash-hero-dot"></span>
               <span class="text-[11px] font-bold uppercase tracking-wider text-neutral-300/80" id="dash-hero-period-label">LỢI NHUẬN HÔM NAY</span>
             </div>
-            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 text-neutral-200 tabular-nums" id="dash-order-count-badge">38 đơn</span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/10 text-neutral-200 tabular-nums" id="dash-order-count-badge">0 đơn</span>
           </div>
 
           <!-- Con số Lợi Nhuận sắc nét, màu dịu mắt trên nền than lì -->
           <div class="mt-2.5 flex items-baseline gap-1.5">
-            <span class="text-[30px] sm:text-[32px] font-bold tracking-normal leading-none text-emerald-300 tabular-nums transition-colors duration-200" id="dash-profit-val">+1.650.000</span>
+            <span class="text-[30px] sm:text-[32px] font-bold tracking-normal leading-none text-white tabular-nums transition-colors duration-200" id="dash-profit-val">0</span>
             <span class="text-base font-semibold text-neutral-400" id="dash-profit-unit">đ</span>
           </div>
         </div>

@@ -71,7 +71,7 @@ function formatVndInput(input) {
   const rawBefore = input.value || '';
   const selStart = input.selectionStart ?? rawBefore.length;
   const digitsBeforeCursor = rawBefore.slice(0, selStart).replace(/\D/g, '').length;
-  const digits = rawBefore.replace(/\D/g, '').replace(/^0+(?=\d)/, '');
+  const digits = rawBefore.replace(/\D/g, '').replace(/^0+(?=\d)/, '').slice(0, 12);
   input.dataset.raw = digits;
   const formatted = digits ? Number(digits).toLocaleString('vi-VN') : '';
   input.value = formatted;
@@ -166,14 +166,15 @@ function formatTime(value) {
 
 function formatDateTimeVi(dateStr) {
   if (!dateStr) return '';
-  const d = new Date(dateStr);
+  const normalized = String(dateStr).trim().replace(' ', 'T');
+  const d = new Date(normalized);
   if (isNaN(d.getTime())) return String(dateStr);
   const hours = String(d.getHours()).padStart(2, '0');
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
-  return `${hours}:${minutes} - ${day}/${month}/${year}`;
+  return `${hours}:${minutes} • ${day}/${month}/${year}`;
 }
 
 function requestNative(method, payload) {
@@ -358,9 +359,13 @@ function clearSampleContent() {
   ['dash-transaction-list', 'sales-product-grid', 'menu-items-list', 'stats-daily-list', 'history-items-list']
     .forEach((id) => { const node = document.getElementById(id); if (node) node.replaceChildren(); });
   ['dash-profit-val', 'dash-revenue-val', 'dash-cost-goods', 'dash-cost-other',
-    'stats-net-revenue', 'stats-total-orders', 'stats-total-revenue', 'stats-cost-goods',
+    'stats-net-revenue', 'stats-total-revenue', 'stats-cost-goods',
     'stats-cost-other', 'hist-sum-revenue', 'hist-sum-cost', 'hist-sum-profit']
-    .forEach((id) => { const node = document.getElementById(id); if (node) node.textContent = '—'; });
+    .forEach((id) => { const node = document.getElementById(id); if (node) node.textContent = '0'; });
+  ['dash-order-count-badge', 'stats-total-orders'].forEach((id) => {
+    const node = document.getElementById(id);
+    if (node) node.textContent = '0 đơn';
+  });
   const menuCount = document.getElementById('menu-total-count');
   if (menuCount) menuCount.textContent = '0 món';
   ['menu-active-count', 'menu-inactive-count', 'dock-cart-badge', 'nav-cart-indicator']

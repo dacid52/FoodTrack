@@ -367,7 +367,7 @@ function renderDaySimpleChart(summary) {
       <div>
         <div class="flex items-baseline justify-between gap-2 mb-1.5">
           <span class="text-xs font-bold text-neutral-800">Thu vào</span>
-          <span class="text-xs font-extrabold tabular-nums text-emerald-600">${rev > 0 ? `+${formatMoney(rev)} đ` : '0 đ'}</span>
+          <span class="text-xs font-extrabold tabular-nums ${rev > 0 ? 'text-emerald-600' : 'text-neutral-400'}">${rev > 0 ? `+${formatMoney(rev)} đ` : '0 đ'}</span>
         </div>
         <div class="w-full h-5 bg-neutral-100 border-l-2 border-neutral-300 overflow-hidden">
           ${rev > 0 ? `<div class="h-full bg-emerald-500 ft-bar-slide" style="width:${revPct}%;--ft-bar-delay:0ms"></div>` : ''}
@@ -380,7 +380,7 @@ function renderDaySimpleChart(summary) {
             <span class="text-xs font-bold text-neutral-800 shrink-0">Chi ra</span>
             ${costParts.length ? `<span class="text-[10px] text-neutral-400 font-medium truncate tabular-nums">(${costParts.join(' • ')})</span>` : ''}
           </div>
-          <span class="text-xs font-extrabold tabular-nums text-orange-600 shrink-0">${totalOut > 0 ? `−${formatMoney(totalOut)} đ` : '0 đ'}</span>
+          <span class="text-xs font-extrabold tabular-nums shrink-0 ${totalOut > 0 ? 'text-orange-600' : 'text-neutral-400'}">${totalOut > 0 ? `−${formatMoney(totalOut)} đ` : '0 đ'}</span>
         </div>
         <div class="w-full h-5 bg-neutral-100 border-l-2 border-neutral-300 overflow-hidden">
           ${totalOut > 0 ? `
@@ -400,7 +400,10 @@ function renderDaySimpleChart(summary) {
   `;
 }
 
+let _statsRefreshReqId = 0;
+
 async function refreshStats() {
+  const reqId = ++_statsRefreshReqId;
   if (!['day', 'week', 'month'].includes(state.statsPeriod)) state.statsPeriod = 'month';
   updateStatsTabPill();
   const range = statsRange();
@@ -454,6 +457,7 @@ async function refreshStats() {
       ? Promise.resolve([])
       : requestNative('reports.daily', { from: range.from, to: range.to, limit: 35 });
     const [summary, detailData] = await Promise.all([summaryPromise, detailPromise]);
+    if (reqId !== _statsRefreshReqId) return;
 
     const profit = Number(summary.profit) || 0;
     const dotEl = document.getElementById('stats-hero-dot');

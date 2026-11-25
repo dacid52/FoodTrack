@@ -80,8 +80,8 @@ function setExpensePayMethod(method) {
   ['cash', 'transfer', 'debt'].forEach((value) => {
     const button = document.getElementById(`exp-pay-${value}`);
     if (button) button.className = value === state.expensePayMethod
-      ? 'relative py-1.5 rounded-lg text-xs font-bold text-neutral-900 transition-colors text-center'
-      : 'relative py-1.5 rounded-lg text-xs font-medium text-neutral-600 hover:text-neutral-900 transition-colors text-center';
+      ? 'relative py-1.5 px-1 rounded-lg text-[11px] sm:text-xs font-bold text-neutral-900 whitespace-nowrap transition-colors text-center'
+      : 'relative py-1.5 px-1 rounded-lg text-[11px] sm:text-xs font-medium text-neutral-600 hover:text-neutral-900 whitespace-nowrap transition-colors text-center';
   });
   positionSlidingPill('exp-pay-pill', `exp-pay-${state.expensePayMethod}`);
 }
@@ -168,7 +168,7 @@ function renderTxModalItems(items) {
     const lineTotal = (Number(item.unit_price_vnd) || 0) * (Number(item.quantity) || 0);
     const row = document.createElement('div');
     row.className = 'flex items-center justify-between gap-2 py-2';
-    row.innerHTML = `<div class="min-w-0"><p class="text-xs font-semibold text-neutral-800 truncate">${escapeHtml(item.product_name)}</p><p class="text-[10px] text-neutral-400">${formatMoney(item.unit_price_vnd || 0)} đ / phần</p></div><div class="text-right shrink-0"><span class="inline-block text-[11px] font-extrabold text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded-lg">${item.quantity}</span><p class="text-[10px] text-neutral-400 mt-0.5">${formatMoney(lineTotal)} đ</p></div>`;
+    row.innerHTML = `<div class="min-w-0 flex-1"><p class="text-xs font-semibold text-neutral-800 truncate">${escapeHtml(item.product_name)}</p><p class="text-[10px] text-neutral-400 tabular-nums">${formatMoney(item.unit_price_vnd || 0)} đ / phần</p></div><div class="text-right shrink-0"><span class="inline-block text-[11px] font-extrabold text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded-lg tabular-nums">x${item.quantity}</span><p class="text-[10px] text-neutral-400 mt-0.5 tabular-nums whitespace-nowrap">${formatMoney(lineTotal)} đ</p></div>`;
     container.appendChild(row);
   });
 }
@@ -195,7 +195,7 @@ async function openTxDetailModal(transaction) {
       amtEl.className = `text-2xl font-extrabold mt-1.5 tabular-nums ${income ? 'text-emerald-600' : 'text-orange-600'}`;
     }
     setText('tx-modal-title', transaction.title);
-    setText('tx-modal-time', formatTime(transaction.occurred_at));
+    setText('tx-modal-time', formatDateTimeVi(transaction.occurred_at) || formatTime(transaction.occurred_at));
     setText('tx-modal-method', transaction.method);
     setText('tx-modal-id', transaction.id);
     document.getElementById('tx-modal-desc-wrap')?.classList.toggle('hidden', isOrder);
@@ -346,8 +346,8 @@ function setEditOrderPay(method) {
   ['cash', 'transfer', 'debt'].forEach((value) => {
     const button = document.getElementById(`edit-order-pay-${value}`);
     if (button) button.className = value === order.paymentMethod
-      ? 'py-1.5 rounded-lg bg-white text-neutral-900 shadow-sm text-center'
-      : 'py-1.5 rounded-lg hover:text-neutral-900 text-center';
+      ? 'py-1.5 px-1 rounded-lg bg-white text-neutral-900 shadow-sm whitespace-nowrap text-center'
+      : 'py-1.5 px-1 rounded-lg hover:text-neutral-900 whitespace-nowrap text-center';
   });
 }
 
