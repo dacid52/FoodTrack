@@ -7,12 +7,7 @@ let _statsChartPoints = [];
 let _statsSelectedIdx = -1;
 
 function updateStatsTabPill() {
-  const pill = document.getElementById('stats-tab-pill');
-  const btn = document.getElementById(`stats-tab-${state.statsPeriod}`);
-  if (pill && btn) {
-    pill.style.width = `${btn.offsetWidth}px`;
-    pill.style.transform = `translateX(${btn.offsetLeft}px)`;
-  }
+  positionSlidingPill('stats-tab-pill', `stats-tab-${state.statsPeriod}`);
 }
 
 function setStatsPeriod(period) {
@@ -290,6 +285,11 @@ function renderDualBarChart(points, defaultIdx) {
       if (pt.purchases > 0 && pt.other > 0) {
         goodsPx = Math.max(3, Math.round((pt.purchases / pt.cost) * costH));
         otherPx = Math.max(3, costH - goodsPx);
+        const maxBarH = plotH - 2;
+        if (goodsPx + otherPx > maxBarH) {
+          if (goodsPx >= otherPx) goodsPx = Math.max(3, maxBarH - otherPx);
+          else otherPx = Math.max(3, maxBarH - goodsPx);
+        }
       } else if (pt.purchases > 0) {
         goodsPx = costH;
       } else {

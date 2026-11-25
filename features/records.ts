@@ -300,6 +300,13 @@ export async function updateOrder(id: string, input: {
         );
       }
 
+      const existingItems = await loadOrderItems(id);
+      const existingByProductId = new Map(
+        existingItems
+          .filter((item) => item.product_id)
+          .map((item) => [item.product_id as string, item]),
+      );
+
       await db.runAsync(
         'UPDATE order_items SET deleted_at = ?, updated_at = ?, revision = revision + 1 WHERE order_id = ? AND deleted_at IS NULL',
         now, now, id,
@@ -308,12 +315,15 @@ export async function updateOrder(id: string, input: {
       newTotal = 0;
       for (const row of input.items) {
         const product = await db.getFirstAsync<Product>('SELECT * FROM products WHERE id=? AND deleted_at IS NULL', row.productId);
-        if (!product) throw new Error('Món trong đơn không còn tồn tại.');
-        const subtotal = product.price_vnd * row.quantity;
+        const fallbackExisting = !product ? existingByProductId.get(row.productId) : undefined;
+        if (!product && !fallbackExisting) throw new Error('Món trong đơn không còn tồn tại.');
+        const itemName = product ? product.name : fallbackExisting!.product_name;
+        const unitPrice = product ? product.price_vnd : fallbackExisting!.unit_price_vnd;
+        const subtotal = unitPrice * row.quantity;
         newTotal += subtotal;
         await db.runAsync(
           'INSERT INTO order_items (id,order_id,product_id,product_name,quantity,unit_price_vnd,unit_cost_vnd,created_at,updated_at,deleted_at,revision) VALUES (?,?,?,?,?,?,?,?,?,NULL,1)',
-          newId(), id, product.id, product.name, row.quantity, product.price_vnd, 0, now, now,
+          newId(), id, row.productId, itemName, row.quantity, unitPrice, 0, now, now,
         );
       }
       assertVnd(newTotal);
@@ -486,13 +496,13 @@ export async function listTransactions(limit = 100, offset = 0, from?: string, t
       `SELECT * FROM (
         SELECT id,'order' AS type,'Đơn hàng #' || printf('%03d',daily_no) AS title,total_vnd AS amount_vnd,payment_method,created_at AS occurred_at,'' AS note
         FROM (
-          SELECT *,ROW_NUMBER() OVER (PARTITION BY substr(created_at,1,10) ORDER BY created_at) AS daily_no
+          SELECT *,ROW_NUMBER() OVER (PARTITION BY substr(created_at,1,10) ORDER BY created_at, order_number) AS daily_no
           FROM orders WHERE deleted_at IS NULL AND created_at >= ? AND created_at < ?
         )
         UNION ALL
         SELECT id,category,title,-amount_vnd AS amount_vnd,payment_method,occurred_at,note
         FROM expenses WHERE deleted_at IS NULL AND occurred_at >= ? AND occurred_at < ?
-      ) ORDER BY occurred_at DESC LIMIT ? OFFSET ?`,
+      ) ORDER BY replace(occurred_at, 'T', ' ') DESC LIMIT ? OFFSET ?`,
       from, toExclusive, from, toExclusive, limit, offset,
     );
   }
@@ -500,13 +510,13 @@ export async function listTransactions(limit = 100, offset = 0, from?: string, t
     `SELECT * FROM (
       SELECT id,'order' AS type,'Đơn hàng #' || printf('%03d',daily_no) AS title,total_vnd AS amount_vnd,payment_method,created_at AS occurred_at,'' AS note
       FROM (
-        SELECT *,ROW_NUMBER() OVER (PARTITION BY substr(created_at,1,10) ORDER BY created_at) AS daily_no
+        SELECT *,ROW_NUMBER() OVER (PARTITION BY substr(created_at,1,10) ORDER BY created_at, order_number) AS daily_no
         FROM orders WHERE deleted_at IS NULL
       )
       UNION ALL
       SELECT id,category,title,-amount_vnd AS amount_vnd,payment_method,occurred_at,note
       FROM expenses WHERE deleted_at IS NULL
-    ) ORDER BY occurred_at DESC LIMIT ? OFFSET ?`,
+    ) ORDER BY replace(occurred_at, 'T', ' ') DESC LIMIT ? OFFSET ?`,
     limit, offset,
   );
 }
@@ -525,7 +535,7 @@ export async function getTransactionById(id: string) {
     `SELECT id,type,title,amount_vnd,payment_method,occurred_at,note FROM (
       SELECT id,'order' AS type,'Đơn hàng #' || printf('%03d',daily_no) AS title,total_vnd AS amount_vnd,payment_method,created_at AS occurred_at,'' AS note
       FROM (
-        SELECT *,ROW_NUMBER() OVER (PARTITION BY substr(created_at,1,10) ORDER BY created_at) AS daily_no
+        SELECT *,ROW_NUMBER() OVER (PARTITION BY substr(created_at,1,10) ORDER BY created_at, order_number) AS daily_no
         FROM orders WHERE deleted_at IS NULL
       )
       UNION ALL

@@ -13,12 +13,7 @@ function historyRange() {
 }
 
 function updateHistTimePill() {
-  const pill = document.getElementById('hist-time-pill');
-  const btn = document.getElementById(`hist-time-${state.historyTimeMode}`);
-  if (pill && btn) {
-    pill.style.width = `${btn.offsetWidth}px`;
-    pill.style.transform = `translateX(${btn.offsetLeft}px)`;
-  }
+  positionSlidingPill('hist-time-pill', `hist-time-${state.historyTimeMode}`);
 }
 
 function isHistoryAtCurrent() {
@@ -275,7 +270,12 @@ function renderHistoryPickerModal(slideDir, animateSelection, skipFetch) {
 
   setText('hist-picker-modal-jump', mode === 'day' ? 'Hôm nay' : mode === 'month' ? 'Tháng này' : 'Năm nay');
   if (jumpBtn) {
-    const atCur = isHistoryAtCurrent();
+    const viewingCurrent = mode === 'day'
+      ? (_histPickerViewYear === now.getFullYear() && _histPickerViewMonth === now.getMonth() + 1)
+      : mode === 'month'
+        ? (_histPickerViewYear === now.getFullYear())
+        : true;
+    const atCur = isHistoryAtCurrent() && viewingCurrent;
     jumpBtn.className = atCur
       ? 'h-8 px-2.5 rounded-full text-[11px] font-semibold bg-neutral-100 text-neutral-400 active:scale-95 transition-all'
       : 'h-8 px-2.5 rounded-full text-[11px] font-bold bg-orange-50 text-primary border border-orange-200/70 active:scale-95 transition-all';
@@ -426,12 +426,7 @@ function renderHistoryPickerModal(slideDir, animateSelection, skipFetch) {
 
 // ================= FILTER & LIST RENDERING =================
 function updateHistFilterPill() {
-  const pill = document.getElementById('hist-filter-pill');
-  const btn = document.getElementById(`hist-filter-${state.historyFilter}`);
-  if (pill && btn) {
-    pill.style.width = `${btn.offsetWidth}px`;
-    pill.style.transform = `translateX(${btn.offsetLeft}px)`;
-  }
+  positionSlidingPill('hist-filter-pill', `hist-filter-${state.historyFilter}`);
 }
 
 function setHistoryFilter(filter) {
@@ -530,7 +525,7 @@ function renderHistoryView() {
     const purchase = transaction.type === 'cost_import';
     const row = document.createElement('div');
     row.className = 'bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-sm flex items-start justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.99] transition-all';
-    row.innerHTML = `<div class="flex items-start gap-3 flex-1 min-w-0 pr-2"><div class="w-9 h-9 rounded-xl ${order ? 'bg-emerald-50 text-emerald-600' : purchase ? 'bg-orange-50 text-orange-600' : 'bg-neutral-100 text-neutral-700'} flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[18px]">${order ? 'point_of_sale' : purchase ? 'inventory_2' : 'receipt_long'}</span></div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-xs font-bold text-neutral-900">${escapeHtml(transaction.title)}</span><span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${order ? 'bg-emerald-50 text-emerald-700' : purchase ? 'bg-orange-50 text-orange-700' : 'bg-neutral-100 text-neutral-700'}">${order ? 'Đơn hàng' : purchase ? 'Tiền nhập hàng' : 'Chi phí khác'}</span></div><p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">${escapeHtml(transaction.desc || 'Chi tiết giao dịch')}</p><div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1"><span>${escapeHtml(transaction.time)}</span><span>•</span><span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">${escapeHtml(transaction.method)}</span></div></div></div><div class="text-right shrink-0"><span class="text-xs font-extrabold whitespace-nowrap tabular-nums ${transaction.amount > 0 ? 'text-emerald-600' : 'text-orange-600'}">${transaction.amount > 0 ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ</span><span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span></div>`;
+    row.innerHTML = `<div class="flex items-start gap-3 flex-1 min-w-0 pr-2"><div class="w-9 h-9 rounded-xl ${order ? 'bg-emerald-50 text-emerald-600' : purchase ? 'bg-orange-50 text-orange-600' : 'bg-neutral-100 text-neutral-700'} flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[18px]">${order ? 'point_of_sale' : purchase ? 'inventory_2' : 'receipt_long'}</span></div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-xs font-bold text-neutral-900 break-words min-w-0">${escapeHtml(transaction.title)}</span><span class="text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0 ${order ? 'bg-emerald-50 text-emerald-700' : purchase ? 'bg-orange-50 text-orange-700' : 'bg-neutral-100 text-neutral-700'}">${order ? 'Đơn hàng' : purchase ? 'Tiền nhập hàng' : 'Chi phí khác'}</span></div><p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">${escapeHtml(transaction.desc || 'Chi tiết giao dịch')}</p><div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1"><span>${escapeHtml(transaction.time)}</span><span>•</span><span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">${escapeHtml(transaction.method)}</span></div></div></div><div class="text-right shrink-0"><span class="text-xs font-extrabold whitespace-nowrap tabular-nums ${transaction.amount > 0 ? 'text-emerald-600' : 'text-orange-600'}">${transaction.amount > 0 ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ</span><span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span></div>`;
     row.addEventListener('click', () => void openTxDetailModal(transaction));
     listNode.appendChild(row);
   });

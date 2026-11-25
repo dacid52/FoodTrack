@@ -167,9 +167,14 @@ function formatTime(value) {
 
 function formatDateTimeVi(dateStr) {
   if (!dateStr) return '';
-  const normalized = String(dateStr).trim().replace(' ', 'T');
-  const d = new Date(normalized);
-  if (isNaN(d.getTime())) return String(dateStr);
+  const raw = String(dateStr).trim();
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+  if (match) {
+    const [, year, month, day, hours, minutes] = match;
+    return hours !== undefined ? `${hours}:${minutes} • ${day}/${month}/${year}` : `${day}/${month}/${year}`;
+  }
+  const d = new Date(raw.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return raw;
   const hours = String(d.getHours()).padStart(2, '0');
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -307,6 +312,10 @@ function showOverlay(el) {
     clearTimeout(el._ftHideTimer);
     el._ftHideTimer = null;
   }
+  if (el._ftSnapTimer) {
+    clearTimeout(el._ftSnapTimer);
+    el._ftSnapTimer = null;
+  }
   delete el.dataset.ftClosing;
   delete el.dataset.ftDraggedOut;
   el.classList.remove('ft-overlay-out', 'ft-sheet-settled', 'hidden');
@@ -324,6 +333,10 @@ function hideOverlay(el) {
   if (el._ftHideTimer) {
     clearTimeout(el._ftHideTimer);
     el._ftHideTimer = null;
+  }
+  if (el._ftSnapTimer) {
+    clearTimeout(el._ftSnapTimer);
+    el._ftSnapTimer = null;
   }
   if (el.dataset.ftDraggedOut) {
     delete el.dataset.ftDraggedOut;

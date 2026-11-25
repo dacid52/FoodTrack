@@ -734,8 +734,8 @@ html, body {
         </div>
         <div class="space-y-2.5 text-xs">
           <div>
-            <label class="block font-semibold text-neutral-600 mb-1">Nội dung chi</label>
-            <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder:text-neutral-400" id="exp-content-input" placeholder="VD: Nhập gà, dầu ăn, đá bi..." type="text">
+            <label class="block font-semibold text-neutral-600 mb-1" for="exp-content-input">Nội dung chi <span class="text-red-500">*</span></label>
+            <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder:text-neutral-400" id="exp-content-input" maxlength="120" placeholder="VD: Nhập gà, dầu ăn, đá bi..." type="text">
           </div>
           <div>
             <label class="block font-semibold text-neutral-600 mb-1">Hình thức thanh toán</label>
@@ -747,8 +747,8 @@ html, body {
             </div>
           </div>
           <div>
-            <label class="block font-semibold text-neutral-600 mb-1">Ghi chú (tùy chọn)</label>
-            <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder:text-neutral-400" id="exp-note-input" placeholder="Nhập ghi chú thêm..." type="text">
+            <label class="block font-semibold text-neutral-600 mb-1" for="exp-note-input">Ghi chú (tùy chọn)</label>
+            <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder:text-neutral-400" id="exp-note-input" maxlength="300" placeholder="Nhập ghi chú thêm..." type="text">
           </div>
         </div>
       </div>
@@ -776,8 +776,8 @@ html, body {
       <div class="p-3.5 overflow-y-auto space-y-3 hide-scrollbar text-xs">
         <input id="menu-form-id" type="hidden" value="">
         <div>
-          <label class="block font-semibold text-neutral-600 mb-1">Tên món ăn <span class="text-red-500">*</span></label>
-          <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder:text-neutral-400" id="menu-form-name" placeholder="VD: Gà rán giòn rụm" type="text">
+          <label class="block font-semibold text-neutral-600 mb-1" for="menu-form-name">Tên món ăn <span class="text-red-500">*</span></label>
+          <input class="w-full bg-white px-3 py-2 rounded-xl border border-neutral-200 text-xs focus:outline-none focus:border-primary text-neutral-800 placeholder:text-neutral-400" id="menu-form-name" maxlength="120" placeholder="VD: Gà rán giòn rụm" type="text">
         </div>
         <div>
           <label class="block font-semibold text-neutral-600 mb-1" for="menu-form-price">Giá bán <span class="text-red-500">*</span></label>
@@ -836,7 +836,7 @@ html, body {
         <div class="text-center py-1">
           <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800" id="tx-modal-type-badge">Giao dịch</span>
           <h4 class="text-2xl font-extrabold text-neutral-900 mt-1.5 tabular-nums" id="tx-modal-amount">0 đ</h4>
-          <p class="text-xs font-semibold text-neutral-700 mt-0.5" id="tx-modal-title">—</p>
+          <p class="text-xs font-semibold text-neutral-700 mt-0.5 break-words" id="tx-modal-title">—</p>
         </div>
         <div class="bg-neutral-50 rounded-2xl p-3 border border-neutral-200 space-y-2 text-xs">
           <div class="flex items-center justify-between gap-3 py-1 border-b border-neutral-200/60">
@@ -964,13 +964,13 @@ html, body {
 
   <!-- BOTTOM SHEET LỊCH CHỌN NGÀY / THÁNG / NĂM CAO CẤP CHO LỊCH SỬ -->
   <div id="history-date-picker-modal" class="hidden absolute inset-0 bg-black/50 z-50 flex flex-col justify-end">
-    <div class="bg-white rounded-t-3xl px-4 pb-5 pt-0 shadow-2xl overflow-hidden">
+    <div class="bg-white rounded-t-3xl max-h-[90%] flex flex-col px-4 pb-5 pt-0 shadow-2xl overflow-hidden">
       <div class="ft-sheet-grabber w-full flex justify-center pt-2.5 pb-1.5 cursor-grab active:cursor-grabbing shrink-0 touch-none">
         <div class="w-10 h-1 bg-neutral-300 rounded-full"></div>
       </div>
 
       <!-- Header gọn 1 hàng: Tiêu đề tháng/năm nổi bật bên trái + Nút Hôm nay & ‹ › bên phải -->
-      <div class="flex items-center justify-between gap-2 pt-1 pb-3">
+      <div class="flex items-center justify-between gap-2 pt-1 pb-3 shrink-0">
         <div class="flex items-baseline gap-1.5 min-w-0">
           <h3 class="text-base font-extrabold text-neutral-900 tracking-tight truncate" id="hist-picker-modal-title">—</h3>
           <span class="text-sm font-semibold text-neutral-400 tabular-nums shrink-0" id="hist-picker-modal-year"></span>
@@ -990,7 +990,7 @@ html, body {
       </div>
 
       <!-- Nội dung lịch ngày / lưới 12 tháng / lưới năm -->
-      <div id="hist-picker-body"></div>
+      <div id="hist-picker-body" class="overflow-y-auto hide-scrollbar"></div>
     </div>
   </div>
 
@@ -1215,9 +1215,14 @@ function formatTime(value) {
 
 function formatDateTimeVi(dateStr) {
   if (!dateStr) return '';
-  const normalized = String(dateStr).trim().replace(' ', 'T');
-  const d = new Date(normalized);
-  if (isNaN(d.getTime())) return String(dateStr);
+  const raw = String(dateStr).trim();
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+  if (match) {
+    const [, year, month, day, hours, minutes] = match;
+    return hours !== undefined ? `${hours}:${minutes} • ${day}/${month}/${year}` : `${day}/${month}/${year}`;
+  }
+  const d = new Date(raw.replace(' ', 'T'));
+  if (isNaN(d.getTime())) return raw;
   const hours = String(d.getHours()).padStart(2, '0');
   const minutes = String(d.getMinutes()).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
@@ -1355,6 +1360,10 @@ function showOverlay(el) {
     clearTimeout(el._ftHideTimer);
     el._ftHideTimer = null;
   }
+  if (el._ftSnapTimer) {
+    clearTimeout(el._ftSnapTimer);
+    el._ftSnapTimer = null;
+  }
   delete el.dataset.ftClosing;
   delete el.dataset.ftDraggedOut;
   el.classList.remove('ft-overlay-out', 'ft-sheet-settled', 'hidden');
@@ -1372,6 +1381,10 @@ function hideOverlay(el) {
   if (el._ftHideTimer) {
     clearTimeout(el._ftHideTimer);
     el._ftHideTimer = null;
+  }
+  if (el._ftSnapTimer) {
+    clearTimeout(el._ftSnapTimer);
+    el._ftSnapTimer = null;
   }
   if (el.dataset.ftDraggedOut) {
     delete el.dataset.ftDraggedOut;
@@ -1542,12 +1555,7 @@ function renderDashboard(animateList) {
 }
 
 function updateDashFilterPill() {
-  const pill = document.getElementById('dash-filter-pill');
-  const btn = document.getElementById(`dash-filter-${state.currentDashboardFilter}`);
-  if (pill && btn) {
-    pill.style.width = `${btn.offsetWidth}px`;
-    pill.style.transform = `translateX(${btn.offsetLeft}px)`;
-  }
+  positionSlidingPill('dash-filter-pill', `dash-filter-${state.currentDashboardFilter}`);
 }
 
 let _dashFilterReqId = 0;
@@ -1563,16 +1571,8 @@ async function setDashboardFilter(period) {
   });
   updateDashFilterPill();
   try {
-    const range = periodRange(period);
-    const previousTo = dateOffsetString(range.from, -1);
-    const dayCount = Math.round((Date.parse(`${range.to}T00:00:00Z`) - Date.parse(`${range.from}T00:00:00Z`)) / 86400000) + 1;
-    const previousFrom = dateOffsetString(previousTo, 1 - dayCount);
-    const [summary, previous] = await Promise.all([
-      requestNative('dashboard.summary', { period }),
-      requestNative('reports.summary', { from: previousFrom, to: previousTo }),
-    ]);
+    const summary = await requestNative('dashboard.summary', { period });
     state.summaries[period] = summary;
-    state.previousSummaries[period] = previous;
     if (reqId !== _dashFilterReqId) return;
     renderDashboard();
   } catch (error) {
@@ -1607,8 +1607,10 @@ function renderSalesProducts(popProductId) {
     const action = quantity > 0
       ? `<div class="flex items-center bg-neutral-100 rounded-lg p-0.5 border border-neutral-200 shrink-0"><button data-step="-1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform" aria-label="Giảm ${escapeHtml(product.name)}">−</button><span class="min-w-[20px] px-0.5 text-center font-bold text-neutral-900 text-xs tabular-nums${popClass}">${quantity}</span><button data-step="1" class="w-6 h-6 rounded flex items-center justify-center bg-white text-neutral-700 font-bold active:scale-90 transition-transform" aria-label="Tăng ${escapeHtml(product.name)}">+</button></div>`
       : `<button class="w-7 h-7 rounded-lg bg-neutral-900 text-white hover:bg-primary active:scale-90 flex items-center justify-center transition-transform shadow-sm shrink-0" aria-label="Thêm ${escapeHtml(product.name)}"><span class="material-symbols-outlined text-[16px]">add</span></button>`;
-    const priceCls = quantity > 0 ? 'text-[11px]' : 'text-xs';
-    card.innerHTML = `<div><div class="w-full aspect-square rounded-xl bg-neutral-100 overflow-hidden relative">${image}${quantity ? `<span class="absolute top-1.5 right-1.5 bg-primary text-white text-[11px] px-2 py-0.5 rounded-full font-bold tabular-nums${popClass}">${quantity}</span>` : ''}</div><h4 class="text-xs font-bold text-neutral-900 mt-1.5 line-clamp-1">${escapeHtml(product.name)}</h4><p class="text-[10px] text-neutral-400 line-clamp-1 mt-0.5">${escapeHtml(product.description || '')}</p></div><div class="mt-2 pt-1.5 border-t border-neutral-100 flex items-center justify-between gap-1"><span class="${priceCls} font-extrabold text-primary whitespace-nowrap tabular-nums">${formatMoney(product.price_vnd)} đ</span>${action}</div>`;
+    const priceCls = quantity > 0
+      ? (Number(product.price_vnd) >= 100000 ? 'text-[10px] tracking-tight' : 'text-[11px]')
+      : 'text-xs';
+    card.innerHTML = `<div><div class="w-full aspect-square rounded-xl bg-neutral-100 overflow-hidden relative">${image}${quantity ? `<span class="absolute top-1.5 right-1.5 bg-primary text-white text-[11px] px-2 py-0.5 rounded-full font-bold tabular-nums${popClass}">${quantity}</span>` : ''}</div><h4 class="text-xs font-bold text-neutral-900 mt-1.5 line-clamp-1">${escapeHtml(product.name)}</h4><p class="text-[10px] text-neutral-400 line-clamp-1 mt-0.5">${escapeHtml(product.description || '')}</p></div><div class="mt-2 pt-1.5 border-t border-neutral-100 flex items-center justify-between gap-1"><span class="${priceCls} font-extrabold text-primary min-w-0 truncate whitespace-nowrap tabular-nums">${formatMoney(product.price_vnd)} đ</span>${action}</div>`;
     card.addEventListener('click', () => addToCart(product.id));
     card.querySelectorAll('[data-step]').forEach((button) => {
       button.addEventListener('click', (event) => {
@@ -2564,12 +2566,7 @@ let _statsChartPoints = [];
 let _statsSelectedIdx = -1;
 
 function updateStatsTabPill() {
-  const pill = document.getElementById('stats-tab-pill');
-  const btn = document.getElementById(`stats-tab-${state.statsPeriod}`);
-  if (pill && btn) {
-    pill.style.width = `${btn.offsetWidth}px`;
-    pill.style.transform = `translateX(${btn.offsetLeft}px)`;
-  }
+  positionSlidingPill('stats-tab-pill', `stats-tab-${state.statsPeriod}`);
 }
 
 function setStatsPeriod(period) {
@@ -2847,6 +2844,11 @@ function renderDualBarChart(points, defaultIdx) {
       if (pt.purchases > 0 && pt.other > 0) {
         goodsPx = Math.max(3, Math.round((pt.purchases / pt.cost) * costH));
         otherPx = Math.max(3, costH - goodsPx);
+        const maxBarH = plotH - 2;
+        if (goodsPx + otherPx > maxBarH) {
+          if (goodsPx >= otherPx) goodsPx = Math.max(3, maxBarH - otherPx);
+          else otherPx = Math.max(3, maxBarH - goodsPx);
+        }
       } else if (pt.purchases > 0) {
         goodsPx = costH;
       } else {
@@ -3120,12 +3122,7 @@ function historyRange() {
 }
 
 function updateHistTimePill() {
-  const pill = document.getElementById('hist-time-pill');
-  const btn = document.getElementById(`hist-time-${state.historyTimeMode}`);
-  if (pill && btn) {
-    pill.style.width = `${btn.offsetWidth}px`;
-    pill.style.transform = `translateX(${btn.offsetLeft}px)`;
-  }
+  positionSlidingPill('hist-time-pill', `hist-time-${state.historyTimeMode}`);
 }
 
 function isHistoryAtCurrent() {
@@ -3382,7 +3379,12 @@ function renderHistoryPickerModal(slideDir, animateSelection, skipFetch) {
 
   setText('hist-picker-modal-jump', mode === 'day' ? 'Hôm nay' : mode === 'month' ? 'Tháng này' : 'Năm nay');
   if (jumpBtn) {
-    const atCur = isHistoryAtCurrent();
+    const viewingCurrent = mode === 'day'
+      ? (_histPickerViewYear === now.getFullYear() && _histPickerViewMonth === now.getMonth() + 1)
+      : mode === 'month'
+        ? (_histPickerViewYear === now.getFullYear())
+        : true;
+    const atCur = isHistoryAtCurrent() && viewingCurrent;
     jumpBtn.className = atCur
       ? 'h-8 px-2.5 rounded-full text-[11px] font-semibold bg-neutral-100 text-neutral-400 active:scale-95 transition-all'
       : 'h-8 px-2.5 rounded-full text-[11px] font-bold bg-orange-50 text-primary border border-orange-200/70 active:scale-95 transition-all';
@@ -3533,12 +3535,7 @@ function renderHistoryPickerModal(slideDir, animateSelection, skipFetch) {
 
 // ================= FILTER & LIST RENDERING =================
 function updateHistFilterPill() {
-  const pill = document.getElementById('hist-filter-pill');
-  const btn = document.getElementById(`hist-filter-${state.historyFilter}`);
-  if (pill && btn) {
-    pill.style.width = `${btn.offsetWidth}px`;
-    pill.style.transform = `translateX(${btn.offsetLeft}px)`;
-  }
+  positionSlidingPill('hist-filter-pill', `hist-filter-${state.historyFilter}`);
 }
 
 function setHistoryFilter(filter) {
@@ -3637,7 +3634,7 @@ function renderHistoryView() {
     const purchase = transaction.type === 'cost_import';
     const row = document.createElement('div');
     row.className = 'bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-sm flex items-start justify-between cursor-pointer hover:bg-neutral-50 active:scale-[0.99] transition-all';
-    row.innerHTML = `<div class="flex items-start gap-3 flex-1 min-w-0 pr-2"><div class="w-9 h-9 rounded-xl ${order ? 'bg-emerald-50 text-emerald-600' : purchase ? 'bg-orange-50 text-orange-600' : 'bg-neutral-100 text-neutral-700'} flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[18px]">${order ? 'point_of_sale' : purchase ? 'inventory_2' : 'receipt_long'}</span></div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-xs font-bold text-neutral-900">${escapeHtml(transaction.title)}</span><span class="text-[9px] px-1.5 py-0.5 rounded font-bold ${order ? 'bg-emerald-50 text-emerald-700' : purchase ? 'bg-orange-50 text-orange-700' : 'bg-neutral-100 text-neutral-700'}">${order ? 'Đơn hàng' : purchase ? 'Tiền nhập hàng' : 'Chi phí khác'}</span></div><p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">${escapeHtml(transaction.desc || 'Chi tiết giao dịch')}</p><div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1"><span>${escapeHtml(transaction.time)}</span><span>•</span><span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">${escapeHtml(transaction.method)}</span></div></div></div><div class="text-right shrink-0"><span class="text-xs font-extrabold whitespace-nowrap tabular-nums ${transaction.amount > 0 ? 'text-emerald-600' : 'text-orange-600'}">${transaction.amount > 0 ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ</span><span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span></div>`;
+    row.innerHTML = `<div class="flex items-start gap-3 flex-1 min-w-0 pr-2"><div class="w-9 h-9 rounded-xl ${order ? 'bg-emerald-50 text-emerald-600' : purchase ? 'bg-orange-50 text-orange-600' : 'bg-neutral-100 text-neutral-700'} flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-[18px]">${order ? 'point_of_sale' : purchase ? 'inventory_2' : 'receipt_long'}</span></div><div class="min-w-0 flex-1"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-xs font-bold text-neutral-900 break-words min-w-0">${escapeHtml(transaction.title)}</span><span class="text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0 ${order ? 'bg-emerald-50 text-emerald-700' : purchase ? 'bg-orange-50 text-orange-700' : 'bg-neutral-100 text-neutral-700'}">${order ? 'Đơn hàng' : purchase ? 'Tiền nhập hàng' : 'Chi phí khác'}</span></div><p class="text-[11px] text-neutral-500 line-clamp-1 mt-0.5">${escapeHtml(transaction.desc || 'Chi tiết giao dịch')}</p><div class="flex items-center gap-2 text-[10px] text-neutral-400 mt-1"><span>${escapeHtml(transaction.time)}</span><span>•</span><span class="px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-600 font-medium">${escapeHtml(transaction.method)}</span></div></div></div><div class="text-right shrink-0"><span class="text-xs font-extrabold whitespace-nowrap tabular-nums ${transaction.amount > 0 ? 'text-emerald-600' : 'text-orange-600'}">${transaction.amount > 0 ? '+' : '−'}${formatMoney(Math.abs(transaction.amount))} đ</span><span class="block text-[9px] text-neutral-400 mt-1">Chi tiết ›</span></div>`;
     row.addEventListener('click', () => void openTxDetailModal(transaction));
     listNode.appendChild(row);
   });
@@ -3721,24 +3718,32 @@ function showHelpGuide() {
   showToast('Xem báo cáo trong Thống kê.');
 }
 
-async function refreshAll() {
-  const data = await requestNative('app.bootstrap');
-  console.log('[FT-REFRESH-ALL] transactions count:', data.transactions?.length, 'products count:', data.products?.length);
-  state.products = data.products;
-  state.transactions = data.transactions;
-  state.dailyHistory = data.dailyHistory;
-  state.summaries = data.summaries;
-  state.previousSummaries.today = data.summaries.yesterday;
-  if (state.historyDaySub === 'today') {
-    state.historyCustomDate = localDate();
-  }
-  if (typeof clearHistoryActivityCache === 'function') clearHistoryActivityCache();
-  renderDashboard();
-  renderSalesProducts();
-  renderCartUI();
-  renderMenuItems();
-  if (state.currentTab === 'stats') await refreshStats();
-  if (state.currentTab === 'history') await refreshHistory();
+let _refreshAllInFlight = null;
+
+function refreshAll() {
+  if (_refreshAllInFlight) return _refreshAllInFlight;
+  _refreshAllInFlight = (async () => {
+    const data = await requestNative('app.bootstrap');
+    console.log('[FT-REFRESH-ALL] transactions count:', data.transactions?.length, 'products count:', data.products?.length);
+    state.products = data.products;
+    state.transactions = data.transactions;
+    state.dailyHistory = data.dailyHistory;
+    state.summaries = data.summaries;
+    state.previousSummaries.today = data.summaries.yesterday;
+    if (state.historyDaySub === 'today') {
+      state.historyCustomDate = localDate();
+    }
+    if (typeof clearHistoryActivityCache === 'function') clearHistoryActivityCache();
+    renderDashboard();
+    renderSalesProducts();
+    renderCartUI();
+    renderMenuItems();
+    if (state.currentTab === 'stats') await refreshStats();
+    if (state.currentTab === 'history') await refreshHistory();
+  })().finally(() => {
+    _refreshAllInFlight = null;
+  });
+  return _refreshAllInFlight;
 }
 
 // Global window bindings for HTML onclick handlers
@@ -4015,6 +4020,10 @@ document.addEventListener('click', (event) => {
   function startDrag(clientX, clientY, target, isMouse) {
     const overlay = findOverlay(target);
     if (!overlay || overlay.classList.contains('hidden') || overlay.dataset.ftClosing) return;
+    if (overlay._ftSnapTimer) {
+      clearTimeout(overlay._ftSnapTimer);
+      overlay._ftSnapTimer = null;
+    }
     const panel = overlay.firstElementChild;
     if (!(panel instanceof HTMLElement) || !panel.contains(target)) return;
 
@@ -4147,7 +4156,9 @@ document.addEventListener('click', (event) => {
       current.panel.style.transform = 'translateY(0px)';
       current.overlay.style.transition = 'background-color 0.22s ease-out';
       current.overlay.style.setProperty('background-color', `rgba(0, 0, 0, ${current.baseAlpha})`, 'important');
-      setTimeout(() => {
+      if (current.overlay._ftSnapTimer) clearTimeout(current.overlay._ftSnapTimer);
+      current.overlay._ftSnapTimer = setTimeout(() => {
+        current.overlay._ftSnapTimer = null;
         if (!current.overlay.dataset.ftClosing) {
           resetSheetDragStyles(current.overlay);
         }

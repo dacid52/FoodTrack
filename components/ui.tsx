@@ -103,7 +103,7 @@ export function Field({ label, ...props }: TextInputProps & { label: string }) {
 }
 
 export function Segmented<T extends string>({ options, value, onChange }: {
-  options: Array<{ value: T; label: string }>;
+  options: { value: T; label: string }[];
   value: T;
   onChange: (value: T) => void;
 }) {

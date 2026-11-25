@@ -21,7 +21,7 @@ type BridgeResponse =
 const MAX_MESSAGE_LENGTH = 8_000_000;
 
 export function FoodTrackWebView() {
-  const webView = useRef<WebView<{}>>(null);
+  const webView = useRef<WebView<object>>(null);
   const writeQueue = useRef<Promise<void>>(Promise.resolve());
   const pendingRequests = useRef(new Set<string>());
   const [htmlUri, setHtmlUri] = useState<string | null>(null);
@@ -152,7 +152,7 @@ export function FoodTrackWebView() {
           status: 'error',
           error: { message: error instanceof Error ? error.message : 'Không thể xử lý yêu cầu.' },
         });
-        console.log(`[FT-BRIDGE-TIMING-ERROR] ${request?.method} -> ${error instanceof Error ? error.stack || error.message : String(error)}`);
+        console.log(`[FT-BRIDGE-TIMING-ERROR] ${request?.method} (${execTime}ms) -> ${error instanceof Error ? error.stack || error.message : String(error)}`);
       } finally {
         if (request) pendingRequests.current.delete(request.id);
       }
@@ -189,7 +189,7 @@ export function FoodTrackWebView() {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <WebView<{}>
+        <WebView<object>
           ref={webView}
           source={{ uri: htmlUri }}
           style={{ flex: 1, backgroundColor: repaintTick % 2 === 0 ? '#fbfbf9' : '#fbfbfa' }}

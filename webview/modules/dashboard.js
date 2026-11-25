@@ -97,12 +97,7 @@ function renderDashboard(animateList) {
 }
 
 function updateDashFilterPill() {
-  const pill = document.getElementById('dash-filter-pill');
-  const btn = document.getElementById(`dash-filter-${state.currentDashboardFilter}`);
-  if (pill && btn) {
-    pill.style.width = `${btn.offsetWidth}px`;
-    pill.style.transform = `translateX(${btn.offsetLeft}px)`;
-  }
+  positionSlidingPill('dash-filter-pill', `dash-filter-${state.currentDashboardFilter}`);
 }
 
 let _dashFilterReqId = 0;
@@ -118,16 +113,8 @@ async function setDashboardFilter(period) {
   });
   updateDashFilterPill();
   try {
-    const range = periodRange(period);
-    const previousTo = dateOffsetString(range.from, -1);
-    const dayCount = Math.round((Date.parse(`${range.to}T00:00:00Z`) - Date.parse(`${range.from}T00:00:00Z`)) / 86400000) + 1;
-    const previousFrom = dateOffsetString(previousTo, 1 - dayCount);
-    const [summary, previous] = await Promise.all([
-      requestNative('dashboard.summary', { period }),
-      requestNative('reports.summary', { from: previousFrom, to: previousTo }),
-    ]);
+    const summary = await requestNative('dashboard.summary', { period });
     state.summaries[period] = summary;
-    state.previousSummaries[period] = previous;
     if (reqId !== _dashFilterReqId) return;
     renderDashboard();
   } catch (error) {

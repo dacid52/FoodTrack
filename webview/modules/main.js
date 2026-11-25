@@ -70,24 +70,32 @@ function showHelpGuide() {
   showToast('Xem báo cáo trong Thống kê.');
 }
 
-async function refreshAll() {
-  const data = await requestNative('app.bootstrap');
-  console.log('[FT-REFRESH-ALL] transactions count:', data.transactions?.length, 'products count:', data.products?.length);
-  state.products = data.products;
-  state.transactions = data.transactions;
-  state.dailyHistory = data.dailyHistory;
-  state.summaries = data.summaries;
-  state.previousSummaries.today = data.summaries.yesterday;
-  if (state.historyDaySub === 'today') {
-    state.historyCustomDate = localDate();
-  }
-  if (typeof clearHistoryActivityCache === 'function') clearHistoryActivityCache();
-  renderDashboard();
-  renderSalesProducts();
-  renderCartUI();
-  renderMenuItems();
-  if (state.currentTab === 'stats') await refreshStats();
-  if (state.currentTab === 'history') await refreshHistory();
+let _refreshAllInFlight = null;
+
+function refreshAll() {
+  if (_refreshAllInFlight) return _refreshAllInFlight;
+  _refreshAllInFlight = (async () => {
+    const data = await requestNative('app.bootstrap');
+    console.log('[FT-REFRESH-ALL] transactions count:', data.transactions?.length, 'products count:', data.products?.length);
+    state.products = data.products;
+    state.transactions = data.transactions;
+    state.dailyHistory = data.dailyHistory;
+    state.summaries = data.summaries;
+    state.previousSummaries.today = data.summaries.yesterday;
+    if (state.historyDaySub === 'today') {
+      state.historyCustomDate = localDate();
+    }
+    if (typeof clearHistoryActivityCache === 'function') clearHistoryActivityCache();
+    renderDashboard();
+    renderSalesProducts();
+    renderCartUI();
+    renderMenuItems();
+    if (state.currentTab === 'stats') await refreshStats();
+    if (state.currentTab === 'history') await refreshHistory();
+  })().finally(() => {
+    _refreshAllInFlight = null;
+  });
+  return _refreshAllInFlight;
 }
 
 // Global window bindings for HTML onclick handlers
@@ -364,6 +372,10 @@ document.addEventListener('click', (event) => {
   function startDrag(clientX, clientY, target, isMouse) {
     const overlay = findOverlay(target);
     if (!overlay || overlay.classList.contains('hidden') || overlay.dataset.ftClosing) return;
+    if (overlay._ftSnapTimer) {
+      clearTimeout(overlay._ftSnapTimer);
+      overlay._ftSnapTimer = null;
+    }
     const panel = overlay.firstElementChild;
     if (!(panel instanceof HTMLElement) || !panel.contains(target)) return;
 
@@ -496,7 +508,9 @@ document.addEventListener('click', (event) => {
       current.panel.style.transform = 'translateY(0px)';
       current.overlay.style.transition = 'background-color 0.22s ease-out';
       current.overlay.style.setProperty('background-color', `rgba(0, 0, 0, ${current.baseAlpha})`, 'important');
-      setTimeout(() => {
+      if (current.overlay._ftSnapTimer) clearTimeout(current.overlay._ftSnapTimer);
+      current.overlay._ftSnapTimer = setTimeout(() => {
+        current.overlay._ftSnapTimer = null;
         if (!current.overlay.dataset.ftClosing) {
           resetSheetDragStyles(current.overlay);
         }

@@ -35,10 +35,14 @@ function shiftMonth(value: string, delta: number): string {
 
 export default function HistoryScreen() {
   const [mode, setMode] = useState<TimeMode>('day');
-  const [selectedDay, setSelectedDay] = useState(localDate());
   const [selectedMonth, setSelectedMonth] = useState(localDate().slice(0, 7));
   const [selectedYear, setSelectedYear] = useState(Number(localDate().slice(0, 4)));
   const [dayOffset, setDayOffset] = useState(0);
+  const selectedDay = useMemo(() => {
+    const adjustedDay = new Date();
+    adjustedDay.setDate(adjustedDay.getDate() + dayOffset);
+    return localDate(adjustedDay);
+  }, [dayOffset]);
   const [filter, setFilter] = useState<TypeFilter>('all');
   const [search, setSearch] = useState('');
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -63,11 +67,7 @@ export default function HistoryScreen() {
 
   useEffect(() => {
     let active = true;
-    const adjustedDay = new Date();
-    adjustedDay.setDate(adjustedDay.getDate() + dayOffset);
-    const nextDay = localDate(adjustedDay);
-    setSelectedDay(nextDay);
-    const currentRange = rangeFor(mode, nextDay, selectedMonth, selectedYear);
+    const currentRange = rangeFor(mode, selectedDay, selectedMonth, selectedYear);
     Promise.all([listTransactions(100, 0, currentRange.from, currentRange.to), getDashboardSummary(currentRange.from, currentRange.to)])
       .then(([rows, totals]) => {
         if (active) {
@@ -79,7 +79,7 @@ export default function HistoryScreen() {
       })
       .catch((error: unknown) => Alert.alert('Không thể tải lịch sử', error instanceof Error ? error.message : 'Lỗi không xác định.'));
     return () => { active = false; };
-  }, [mode, dayOffset, selectedMonth, selectedYear]);
+  }, [mode, selectedDay, selectedMonth, selectedYear]);
 
   const filtered = useMemo(() => transactions.filter((item) => {
     const time = item.occurred_at.slice(0, 10);

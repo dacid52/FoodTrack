@@ -7,7 +7,6 @@ import { ExpenseSheet } from '../../components/ExpenseSheet';
 import { Button, Card, Page, SectionTitle, Segmented, common } from '../../components/ui';
 import { formatVnd, localDate } from '../../database/format';
 import { getDashboardSummary, listTransactions } from '../../features/records';
-import type { ExpenseCategory, PaymentMethod } from '../../database/types';
 import { useAppStore } from '../../store/useAppStore';
 import { colors, spacing } from '../../theme/tokens';
 
@@ -57,20 +56,22 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
     const range = periodRange(period);
-    Promise.all([getDashboardSummary(range.from, range.to), listTransactions(4)])
-      .then(([nextSummary, rows]) => {
+    void Promise.resolve().then(async () => {
+      if (active) setLoading(true);
+      try {
+        const [nextSummary, rows] = await Promise.all([getDashboardSummary(range.from, range.to), listTransactions(4)]);
         if (active) {
           setSummary(nextSummary);
           setTransactions(rows);
         }
-      })
-      .catch((error: unknown) => {
+      } catch (error: unknown) {
         if (active) setTransactions([]);
         console.error('Không thể tải tổng quan FoodTrack', error);
-      })
-      .finally(() => { if (active) setLoading(false); });
+      } finally {
+        if (active) setLoading(false);
+      }
+    });
     return () => { active = false; };
   }, [period, storeReady]);
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { HeaderActions } from '../../components/HeaderActions';
-import { Button, Card, EmptyState, Page, Segmented, SectionTitle, common } from '../../components/ui';
+import { Card, EmptyState, Page, Segmented, SectionTitle, common } from '../../components/ui';
 import { dateLabel, formatVnd, localDate } from '../../database/format';
 import { getDailyReport, getDashboardSummary } from '../../features/records';
 import { colors, spacing } from '../../theme/tokens';
@@ -38,16 +38,20 @@ export default function StatsScreen() {
     const today = localDate();
     const range = mode === 'day' ? { from: today, to: today } :
       mode === 'month' ? monthRange(month) : { from: `${year}-01-01`, to: `${year}-12-31` };
-    setLoading(true);
-    Promise.all([getDashboardSummary(range.from, range.to), getDailyReport(range.from, range.to, mode === 'year' ? 366 : 31)])
-      .then(([totals, days]) => {
+    void Promise.resolve().then(async () => {
+      if (active) setLoading(true);
+      try {
+        const [totals, days] = await Promise.all([getDashboardSummary(range.from, range.to), getDailyReport(range.from, range.to, mode === 'year' ? 366 : 31)]);
         if (active) {
           setSummary(totals);
           setDaily(days);
         }
-      })
-      .catch((error: unknown) => Alert.alert('Không thể tải báo cáo', error instanceof Error ? error.message : 'Lỗi không xác định.'))
-      .finally(() => { if (active) setLoading(false); });
+      } catch (error: unknown) {
+        Alert.alert('Không thể tải báo cáo', error instanceof Error ? error.message : 'Lỗi không xác định.');
+      } finally {
+        if (active) setLoading(false);
+      }
+    });
     return () => { active = false; };
   }, [mode, month, year]);
 
