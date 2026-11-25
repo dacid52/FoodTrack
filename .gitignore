@@ -47,6 +47,14 @@ yarn-error.*
 *.aab
 *.ipa
 
+# IDE / editor configs
+.vscode/
+.idea/
+.cursor/
+*.swp
+*.swo
+Desktop.ini
+
 # local preview / scratch / OS / secrets
 webview-test/
 scripts/build-webview-test.js
