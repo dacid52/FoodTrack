@@ -235,7 +235,7 @@ function openImageCropModal(dataUri) {
     viewport.addEventListener('pointerdown', (event) => {
       if (!crop.img) return;
       crop.pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
-      viewport.setPointerCapture(event.pointerId);
+      try { viewport.setPointerCapture(event.pointerId); } catch {}
       if (crop.pointers.size === 2) {
         const p = pinchPoints();
         crop.pinch = p ? { ...p } : null;
@@ -289,10 +289,15 @@ function openImageCropModal(dataUri) {
       applyCropTransform();
     });
   }
+  img.onerror = () => {
+    crop.img = null;
+    showToast('Không thể đọc ảnh đã chọn.', true);
+  };
   img.onload = () => {
     showOverlay(modal);
     requestAnimationFrame(() => {
-      const v = viewport.getBoundingClientRect().width;
+      const v = viewport.clientWidth || viewport.getBoundingClientRect().width || 300;
+      if (!img.naturalWidth || !img.naturalHeight) return;
       crop.img = img;
       crop.view = v;
       crop.cover = Math.max(v / img.naturalWidth, v / img.naturalHeight);

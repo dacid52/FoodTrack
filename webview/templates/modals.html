@@ -184,8 +184,8 @@
       <div class="p-3.5 overflow-y-auto space-y-2.5 hide-scrollbar flex-1">
         <div id="edit-order-items" class="space-y-2"></div>
         <div class="flex gap-2">
-          <select id="edit-order-product-select" class="flex-1 min-w-0 text-[11px] py-2 px-2 border border-neutral-200 rounded-xl bg-neutral-50 font-semibold text-neutral-700 focus:outline-none focus:border-primary"></select>
-          <button onclick="addEditOrderItem()" class="px-3 py-2 rounded-xl bg-neutral-900 text-white text-[11px] font-bold flex items-center gap-1 active:scale-95 transition-all shrink-0">
+          <select id="edit-order-product-select" class="flex-1 min-w-0 text-[11px] py-2 px-2 border border-neutral-200 rounded-xl bg-neutral-50 font-semibold text-neutral-700 focus:outline-none focus:border-primary disabled:opacity-50"></select>
+          <button type="button" id="edit-order-add-btn" onclick="addEditOrderItem()" class="px-3 py-2 rounded-xl bg-neutral-900 text-white text-[11px] font-bold flex items-center gap-1 active:scale-95 disabled:opacity-40 disabled:pointer-events-none transition-all shrink-0">
             <span class="material-symbols-outlined text-[15px]">add</span>
             Thêm
           </button>

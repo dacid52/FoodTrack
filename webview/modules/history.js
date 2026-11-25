@@ -214,6 +214,7 @@ function buildDayActivityMap(year, month) {
 async function loadHistoryPickerMonthDots(year, month) {
   const mPad = String(month).padStart(2, '0');
   const cacheKey = `${year}-${mPad}`;
+  if (_histMonthActivityCache.has(cacheKey)) return;
   const daysInMonth = new Date(year, month, 0).getDate();
   const from = `${cacheKey}-01`;
   const to = `${cacheKey}-${String(daysInMonth).padStart(2, '0')}`;
@@ -236,6 +237,8 @@ async function loadHistoryPickerMonthDots(year, month) {
 }
 
 async function loadHistoryPickerYearMonths(year) {
+  const cacheKey = String(year);
+  if (_histYearActiveMonthsCache.has(cacheKey)) return;
   try {
     const rows = await requestNative('reports.daily', { from: `${year}-01-01`, to: `${year}-12-31`, limit: 366 });
     const activeSet = new Set();
@@ -245,7 +248,7 @@ async function loadHistoryPickerYearMonths(year) {
       const cost = (Number(r.purchases) || 0) + (Number(r.other) || 0);
       if (rev > 0 || cost > 0) activeSet.add(Number(r.day.slice(5, 7)));
     });
-    _histYearActiveMonthsCache.set(String(year), activeSet);
+    _histYearActiveMonthsCache.set(cacheKey, activeSet);
     const modal = document.getElementById('history-date-picker-modal');
     if (modal && !modal.classList.contains('hidden') && state.historyTimeMode === 'month'
       && _histPickerViewYear === year) {

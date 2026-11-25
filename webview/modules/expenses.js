@@ -277,9 +277,12 @@ function openEditOrderModal() {
       }),
   };
   const select = document.getElementById('edit-order-product-select');
+  const addBtn = document.getElementById('edit-order-add-btn');
   if (select) {
     select.replaceChildren();
     const activeProducts = state.products.filter((product) => product.active);
+    select.disabled = !activeProducts.length;
+    if (addBtn) addBtn.disabled = !activeProducts.length;
     if (!activeProducts.length) {
       const option = document.createElement('option');
       option.value = '';
