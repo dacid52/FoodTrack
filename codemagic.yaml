@@ -24,7 +24,11 @@ workflows:
       - name: Build unsigned .app
         script: |
           cd ios
-          xcodebuild -workspace FoodTrack.xcworkspace -scheme FoodTrack \
+          WORKSPACE=$(find . -maxdepth 1 -name "*.xcworkspace" -print -quit | sed 's|^\./||')
+          SCHEME="${WORKSPACE%.xcworkspace}"
+          if [ -z "$WORKSPACE" ]; then echo "No .xcworkspace found"; exit 1; fi
+          echo "Building workspace=$WORKSPACE scheme=$SCHEME"
+          xcodebuild -workspace "$WORKSPACE" -scheme "$SCHEME" \
             -configuration Release -sdk iphoneos \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \

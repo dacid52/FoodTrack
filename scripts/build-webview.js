@@ -69,9 +69,14 @@ html = html.replace(
 
 // Close main tag after last view section, before footer
 html = html.replace(
-  '</section>\n<!-- FIXED BOTTOM TAB NAVIGATION',
+  /<\/section>\s*\n<!-- FIXED BOTTOM TAB NAVIGATION/,
   '</section>\n  </main>\n\n<!-- FIXED BOTTOM TAB NAVIGATION'
 );
+
+if (!html.includes('<main ') || !html.includes('</main>')) {
+  console.error('Failed to inject <main> wrapper around views.');
+  process.exit(1);
+}
 
 // Inject CSS
 const css = `${fontFaces}${titanOneFace}${symbolsFace}${read('webview/generated.css')}`;

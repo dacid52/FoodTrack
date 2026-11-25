@@ -26,6 +26,7 @@ export default function RootLayout() {
     BeVietnamPro_700Bold,
   });
   const ready = useAppStore((state) => state.ready);
+  const loading = useAppStore((state) => state.loading);
   const error = useAppStore((state) => state.error);
   const refresh = useAppStore((state) => state.refresh);
   const [started, setStarted] = useState(false);
@@ -50,9 +51,9 @@ export default function RootLayout() {
   if (!ready) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', padding: 24, backgroundColor: colors.canvas, gap: 16 }}>
-        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700', fontFamily: 'BeVietnamPro_700Bold' }}>Không mở được dữ liệu HaFood</Text>
+        <Text style={{ color: colors.text, fontSize: 18, fontWeight: '700', fontFamily: 'BeVietnamPro_700Bold' }}>Không mở được dữ liệu Hà Food</Text>
         {error ? <ErrorNotice message={error} /> : null}
-        <ActivityIndicator color={colors.primary} />
+        {loading ? <ActivityIndicator color={colors.primary} /> : null}
         <Text onPress={() => refresh().catch(() => undefined)} style={{ color: colors.primary, textAlign: 'center', fontFamily: 'BeVietnamPro_600SemiBold' }}>Thử lại</Text>
       </View>
     );
