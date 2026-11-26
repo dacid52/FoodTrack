@@ -60,7 +60,7 @@ async function toggleProductStatus(id, active) {
     await runWrite('products.active', { id, active });
   } catch (error) {
     try {
-      await refreshAll();
+      await refreshAll(true);
     } catch (refreshError) {
       product.active = previousActive;
       renderMenuItems();
@@ -93,7 +93,7 @@ async function confirmDeleteProduct() {
   try {
     await runWrite('products.delete', { id });
     closeDeleteProductModal();
-    await refreshAll();
+    await refreshAll(true);
     showToast(`Đã xóa món ${product.name}.`);
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
@@ -163,7 +163,7 @@ async function saveMenuItem() {
     const description = state.products.find((product) => product.id === id)?.description || '';
     await runWrite('products.save', { id, name, description, price_vnd: price, active, image_uri: image });
     closeMenuModal();
-    await refreshAll();
+    await refreshAll(true);
     showToast(id ? `Đã cập nhật ${name}.` : `Đã thêm ${name}.`);
   } catch (error) { reportError(error); }
   finally { setBusy(false); }

@@ -945,12 +945,12 @@ input, textarea, select {
       </div>
       <div class="overflow-y-auto px-4 py-2 divide-y divide-neutral-100 flex-1 min-h-0 hide-scrollbar" id="sheet-cart-items"><div class="py-6 text-center text-neutral-400 text-xs">Chưa có món nào trong đơn</div></div>
       <div class="px-4 py-3 bg-neutral-50/90 border-t border-neutral-100 flex flex-col gap-2.5">
-        <div class="flex items-center justify-between text-xs">
-          <span class="text-neutral-500 font-medium">Phương thức:</span>
-          <div class="relative flex items-center gap-1 p-0.5 bg-neutral-200/80 rounded-lg" id="sheet-pay-bar">
+        <div class="flex items-center justify-between gap-2 text-xs">
+          <span class="text-neutral-500 font-medium shrink-0">Phương thức:</span>
+          <div class="relative flex items-center gap-1 p-0.5 bg-neutral-200/80 rounded-lg shrink-0" id="sheet-pay-bar">
             <div class="ft-pill absolute top-0.5 bottom-0.5 left-0 bg-white rounded-md shadow-sm pointer-events-none" id="sheet-pay-pill"></div>
-            <button class="relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-900 transition-colors" id="sheet-pay-cash" onclick="setPaymentMethod('cash')">Tiền mặt</button>
-            <button class="relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-600 hover:text-neutral-900 transition-colors" id="sheet-pay-transfer" onclick="setPaymentMethod('transfer')">Chuyển khoản</button>
+            <button class="relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-900 whitespace-nowrap transition-colors" id="sheet-pay-cash" onclick="setPaymentMethod('cash')">Tiền mặt</button>
+            <button class="relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-600 hover:text-neutral-900 whitespace-nowrap transition-colors" id="sheet-pay-transfer" onclick="setPaymentMethod('transfer')">Chuyển khoản</button>
           </div>
         </div>
         <div class="flex items-center justify-between pt-1 border-t border-neutral-200/60">
@@ -1789,8 +1789,8 @@ function setPaymentMethod(method) {
   ['cash', 'transfer'].forEach((value) => {
     const button = document.getElementById(`sheet-pay-${value}`);
     if (button) button.className = value === state.paymentMethod
-      ? 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-900 transition-colors'
-      : 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-600 hover:text-neutral-900 transition-colors';
+      ? 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-900 whitespace-nowrap transition-colors'
+      : 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-600 hover:text-neutral-900 whitespace-nowrap transition-colors';
   });
   positionSlidingPill('sheet-pay-pill', `sheet-pay-${state.paymentMethod}`);
   renderCartUI();
@@ -1806,7 +1806,7 @@ async function confirmOrder() {
     await runWrite('orders.create', { items, paymentMethod: state.paymentMethod });
     clearCart();
     closeCartSheet();
-    await refreshAll();
+    await refreshAll(true);
     showToast('Bán hàng thành công!');
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
@@ -1874,7 +1874,7 @@ async function toggleProductStatus(id, active) {
     await runWrite('products.active', { id, active });
   } catch (error) {
     try {
-      await refreshAll();
+      await refreshAll(true);
     } catch (refreshError) {
       product.active = previousActive;
       renderMenuItems();
@@ -1907,7 +1907,7 @@ async function confirmDeleteProduct() {
   try {
     await runWrite('products.delete', { id });
     closeDeleteProductModal();
-    await refreshAll();
+    await refreshAll(true);
     showToast(`Đã xóa món ${product.name}.`);
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
@@ -1977,7 +1977,7 @@ async function saveMenuItem() {
     const description = state.products.find((product) => product.id === id)?.description || '';
     await runWrite('products.save', { id, name, description, price_vnd: price, active, image_uri: image });
     closeMenuModal();
-    await refreshAll();
+    await refreshAll(true);
     showToast(id ? `Đã cập nhật ${name}.` : `Đã thêm ${name}.`);
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
@@ -2333,7 +2333,7 @@ async function saveExpenseRecord() {
       });
       closeExpenseModal();
       closeTxDetailModal();
-      await refreshAll();
+      await refreshAll(true);
       showToast('Đã cập nhật khoản chi.');
     } else {
       await runWrite('expenses.create', {
@@ -2345,7 +2345,7 @@ async function saveExpenseRecord() {
         occurredAt,
       });
       closeExpenseModal();
-      await refreshAll();
+      await refreshAll(true);
       showToast('Đã lưu chi phí.');
     }
   } catch (error) { reportError(error); }
@@ -2459,7 +2459,7 @@ async function executeDeleteOrder() {
     closeEditOrderModal();
     closeExpenseModal();
     closeTxDetailModal();
-    await refreshAll();
+    await refreshAll(true);
     showToast(isOrder ? 'Đã xóa đơn hàng.' : 'Đã xóa khoản chi.');
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
@@ -2596,7 +2596,7 @@ async function saveEditOrder() {
     });
     closeEditOrderModal();
     closeTxDetailModal();
-    await refreshAll();
+    await refreshAll(true);
     showToast('Đã cập nhật đơn hàng.');
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
@@ -3782,9 +3782,18 @@ function showHelpGuide() {
 }
 
 let _refreshAllInFlight = null;
+let _refreshAllQueued = false;
 
-function refreshAll() {
-  if (_refreshAllInFlight) return _refreshAllInFlight;
+function refreshAll(forceAfterWrite) {
+  if (_refreshAllInFlight) {
+    if (forceAfterWrite) _refreshAllQueued = true;
+    return _refreshAllInFlight.then(() => {
+      if (_refreshAllQueued) {
+        _refreshAllQueued = false;
+        return refreshAll(false);
+      }
+    });
+  }
   _refreshAllInFlight = (async () => {
     const data = await requestNative('app.bootstrap');
     console.log('[FT-REFRESH-ALL] transactions count:', data.transactions?.length, 'products count:', data.products?.length);
@@ -3806,7 +3815,12 @@ function refreshAll() {
   })().finally(() => {
     _refreshAllInFlight = null;
   });
-  return _refreshAllInFlight;
+  return _refreshAllInFlight.then(() => {
+    if (_refreshAllQueued) {
+      _refreshAllQueued = false;
+      return refreshAll(false);
+    }
+  });
 }
 
 // Global window bindings for HTML onclick handlers

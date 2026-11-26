@@ -125,7 +125,7 @@ async function saveExpenseRecord() {
       });
       closeExpenseModal();
       closeTxDetailModal();
-      await refreshAll();
+      await refreshAll(true);
       showToast('Đã cập nhật khoản chi.');
     } else {
       await runWrite('expenses.create', {
@@ -137,7 +137,7 @@ async function saveExpenseRecord() {
         occurredAt,
       });
       closeExpenseModal();
-      await refreshAll();
+      await refreshAll(true);
       showToast('Đã lưu chi phí.');
     }
   } catch (error) { reportError(error); }
@@ -251,7 +251,7 @@ async function executeDeleteOrder() {
     closeEditOrderModal();
     closeExpenseModal();
     closeTxDetailModal();
-    await refreshAll();
+    await refreshAll(true);
     showToast(isOrder ? 'Đã xóa đơn hàng.' : 'Đã xóa khoản chi.');
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
@@ -388,7 +388,7 @@ async function saveEditOrder() {
     });
     closeEditOrderModal();
     closeTxDetailModal();
-    await refreshAll();
+    await refreshAll(true);
     showToast('Đã cập nhật đơn hàng.');
   } catch (error) { reportError(error); }
   finally { setBusy(false); }

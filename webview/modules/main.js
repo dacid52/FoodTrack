@@ -71,9 +71,18 @@ function showHelpGuide() {
 }
 
 let _refreshAllInFlight = null;
+let _refreshAllQueued = false;
 
-function refreshAll() {
-  if (_refreshAllInFlight) return _refreshAllInFlight;
+function refreshAll(forceAfterWrite) {
+  if (_refreshAllInFlight) {
+    if (forceAfterWrite) _refreshAllQueued = true;
+    return _refreshAllInFlight.then(() => {
+      if (_refreshAllQueued) {
+        _refreshAllQueued = false;
+        return refreshAll(false);
+      }
+    });
+  }
   _refreshAllInFlight = (async () => {
     const data = await requestNative('app.bootstrap');
     console.log('[FT-REFRESH-ALL] transactions count:', data.transactions?.length, 'products count:', data.products?.length);
@@ -95,7 +104,12 @@ function refreshAll() {
   })().finally(() => {
     _refreshAllInFlight = null;
   });
-  return _refreshAllInFlight;
+  return _refreshAllInFlight.then(() => {
+    if (_refreshAllQueued) {
+      _refreshAllQueued = false;
+      return refreshAll(false);
+    }
+  });
 }
 
 // Global window bindings for HTML onclick handlers

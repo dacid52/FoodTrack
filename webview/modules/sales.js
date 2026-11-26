@@ -188,8 +188,8 @@ function setPaymentMethod(method) {
   ['cash', 'transfer'].forEach((value) => {
     const button = document.getElementById(`sheet-pay-${value}`);
     if (button) button.className = value === state.paymentMethod
-      ? 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-900 transition-colors'
-      : 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-600 hover:text-neutral-900 transition-colors';
+      ? 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-900 whitespace-nowrap transition-colors'
+      : 'relative px-2.5 py-1 text-xs font-semibold rounded-md text-neutral-600 hover:text-neutral-900 whitespace-nowrap transition-colors';
   });
   positionSlidingPill('sheet-pay-pill', `sheet-pay-${state.paymentMethod}`);
   renderCartUI();
@@ -205,7 +205,7 @@ async function confirmOrder() {
     await runWrite('orders.create', { items, paymentMethod: state.paymentMethod });
     clearCart();
     closeCartSheet();
-    await refreshAll();
+    await refreshAll(true);
     showToast('Bán hàng thành công!');
   } catch (error) { reportError(error); }
   finally { setBusy(false); }
